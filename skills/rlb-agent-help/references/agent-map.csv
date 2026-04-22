@@ -1,0 +1,12 @@
+Agente/Workflow,Ação do Usuário,Recomendação
+rlb-agent-historian,"quero importar um PDF, quero ler o que aconteceu em 1920, como integro esse NPC no passado","Use o Historian para gerenciar fatos históricos e lore externa."
+rlb-agent-tactician,"preciso de um boss nível 5, exportar pro Foundry, balancear encontro","O Tactician é o especialista em combate e mecânicas técnicas."
+rlb-agent-weaver,"preciso de ideias de diálogos, ganchos de aventura, roteiro de cena","Chame o Weaver para tecer a narrativa e o drama da sessão."
+rlb-agent-inquisitor,"verificar se o lore está certo, auditar a wiki, validar novo registro","O Inquisidor garante que o mundo não tenha contradições."
+rlb-agent-chronicler,"quem é o rei?, o que sabemos sobre a caverna?, oráculo rápido","O Chronicler é sua enciclopédia rápida para consultas durante o jogo."
+rlb-workflow-genesis,"começar campanha nova, criar mundo do zero","Inicie o workflow Genesis para estabelecer as fundações do seu mundo."
+rlb-workflow-prep-session,"vou mestrar amanhã e não tenho nada, preparar próxima sessão","O Prep-Session vai te ajudar a montar a aventura completa."
+rlb-workflow-session-log,"acabamos de jogar, registrar o que aconteceu na mesa","Use o Session-Log para não perder nenhum detalhe do que os jogadores fizeram."
+rlb-workflow-backstory,"jogador mandou background, integrar história de PC","O Backstory ajuda a trazer os personagens dos jogadores para o centro do lore."
+rlb-workflow-downtime,"o que acontece entre as sessões?, atividades de repouso","Gerencie o tempo que passa entre aventuras com o Downtime."
+rlb-workflow-party-knowledge,"o que os jogadores sabem?, relatório de conhecimento do grupo","O Party-Knowledge mostra o mundo sob a perspectiva dos jogadores."
