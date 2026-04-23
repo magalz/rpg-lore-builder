@@ -48,7 +48,9 @@ Estes agentes ajudam você a criar o mundo e narrar o jogo:
 ### 🛡️ The Lore Sentinels (Governança e Consistência)
 Estes agentes trabalham nos bastidores para que a sua campanha nunca tenha furos:
 *   **O Historiador (`rlb-agent-historian`)**: O Compilador. Ele executa a **Ingestão Universal**: lê os arquivos da pasta `raw/`, extrai entidades e destila isso em notas limpas na pasta `wiki/` com links Obsidian.
-*   **O Inquisidor (`rlb-agent-inquisitor`)**: O "Auditor de Furos de Roteiro". Ele roda em background antes de cada sessão para avisar o Mestre sobre pontas soltas (Ex: "Vocês esqueceram o NPC X vivo na masmorra faz 3 meses") e contradições na Wiki.
+*   **O Inquisidor (`rlb-agent-inquisitor`)**: O "Auditor de Furos de Roteiro". Ele atua em duas frentes vitais:
+    1.  **O Filtro de Cânone (Reativo):** Durante o registro de sessões ou adição de nova lore, ele cruza as informações novas com a Wiki em tempo real, impedindo que você adicione fatos que contradizem o passado da campanha.
+    2.  **A Auditoria Matinal (Proativo):** Roda em background antes do planejamento de cada sessão para varrer a Wiki inteira, alertando o Mestre sobre pontas soltas (Ex: "Vocês esqueceram o NPC X vivo na masmorra faz 3 meses") e notas órfãs.
 
 ---
 
