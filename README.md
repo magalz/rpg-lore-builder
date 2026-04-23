@@ -1,79 +1,70 @@
-# 🎲 RPG Lore Builder (rlb) - Versão 2.0
+# 🎲 RPG Lore Builder (rlb) - Versão 2.0 (The Second Brain Update)
 
-Um ecossistema de agentes de IA coordenados para a construção coesa de mundos, personagens e campanhas de RPG. O foco principal é eliminar inconsistências, furos de roteiro e reduzir a carga cognitiva do Mestre (DM).
-
-## 📋 Visão Geral
-
-O **RPG Lore Builder** utiliza o padrão **Lore Council & Sentinel**, dividindo as responsabilidades entre criação criativa e governança de dados. Todos os agentes compartilham uma "Fonte da Verdade" única através de uma memória centralizada, garantindo que cada detalhe do mundo seja consistente.
+O **RPG Lore Builder** é um ecossistema de agentes de IA coordenados, projetado para atuar como o **"Segundo Cérebro" do Mestre de RPG**. Ele não apenas responde a perguntas, mas compila ativamente a sua campanha em um banco de dados estruturado, interconectado e imutável (estilo Obsidian), eliminando inconsistências, furos de roteiro e reduzindo drasticamente a carga cognitiva do Mestre.
 
 ---
 
-## ✨ Novidades da Versão 2.0
+## 📋 A Filosofia do "Segundo Cérebro"
 
-*   **Busca na Web (Meta-Game):** O Cronista agora pode realizar pesquisas em tempo real sobre regras, itens e monstros.
-*   **Integração VTT (Foundry):** Exportação direta de NPCs e Monstros em formato JSON para o Foundry VTT.
-*   **Simulação de Downtime:** Evolução dinâmica do mundo durante períodos de descanso.
-*   **Gestão de Backstories:** Integração orgânica de novos jogadores ao cenário existente.
-*   **Relatórios de Conhecimento:** Geração automática de handouts "O que vocês sabem" para os jogadores.
+Em vez do modelo clássico de chat (onde você pergunta e a IA tenta encontrar a resposta num mar de textos desorganizados), o RPG Lore Builder usa a filosofia de **Compilação em vez de Recuperação**. 
+
+O sistema possui uma arquitetura de três camadas na pasta `_bmad/memory/rlb/`:
+- **`raw/` (Anotações Brutas):** A caixa de entrada. Onde os logs de sessão informais, PDFs de regras ou anotações rápidas do Mestre são despejados. São arquivos imutáveis.
+- **`wiki/` (A Enciclopédia Obsidian):** Onde os agentes compilam os dados brutos. São páginas em Markdown perfeitamente formatadas para cada NPC, Facção ou Local, utilizando a sintaxe de links duplos `[[Nome]]` para criar um **Graph View** das suas conexões (totalmente compatível com Obsidian).
+- **`schema/` (As Leis do Mundo):** Arquivos que ditam as regras de formatação para que os agentes mantenham a Wiki sempre padronizada.
+
+Qualquer nova informação que entra na campanha passa pela **Ingestão Universal**, um processo automatizado onde a IA lê o arquivo bruto na pasta `raw/`, atualiza ou cria novas notas na `wiki/` e gera conexões bidirecionais automáticas.
 
 ---
 
-## 🚀 Instalação e Requisitos
+## 🚀 Como Preparar o Ambiente
 
 ### Pré-requisitos
-- **Gemini CLI** instalado e configurado.
-- Chave de API do Google Gemini.
-- Python 3.10+.
+- Ter o **Gemini CLI** ou um framework BMad compatível rodando.
+- Chave de API de um modelo de linguagem forte (como Google Gemini ou Claude).
+- (Recomendado) Ter o aplicativo **Obsidian** instalado para visualizar a pasta `wiki/` como um cofre (Vault) visual.
 
-### Como Instalar
-1. Clone este repositório: `git clone https://github.com/seu-usuario/rpg-lore-builder.git`
-2. Inicialize o índice: `graph-init`
-3. O módulo `rlb` estará disponível como um conjunto de skills.
+### Instalação
+1. Clone o repositório: 
+   ```bash
+   git clone https://github.com/magalz/rpg-lore-builder.git
+   ```
+2. Acesse a pasta do projeto e inicie sua ferramenta de IA (ex: Gemini CLI).
+3. A estrutura de memória já está preparada nas pastas `_bmad/memory/rlb/raw` e `_bmad/memory/rlb/wiki`. Opcionalmente, abra a pasta `wiki/` dentro do **Obsidian** para aproveitar o Graph View.
 
 ---
 
-## 🧠 Arquitetura: The Lore Council
+## 🧠 Arquitetura de Agentes
 
-### 🏛️ O Conselho Criativo (The Lore Council)
-*   **O Cronista (`rlb-agent-chronicler`)**: Oráculo do mundo. Fornece respostas sobre a Lore (In/Meta-Game) e pesquisa regras/itens na internet via **Web Oracle**.
-*   **O Arquiteto (`rlb-agent-builder`)**: Especialista em worldbuilding físico e biográfico (NPCs e Locais).
-*   **O Diretor (`rlb-agent-weaver`)**: Roteirista focado em drama, beats de sessão e ganchos de aventura.
-*   **O Tático (`rlb-agent-tactician`)**: Especialista mecânico. Gera monstros (Homebrew ou Reskin), balanceia encontros por CR e exporta dados para **Foundry VTT**.
+O sistema divide as responsabilidades entre **Criação Criativa** e **Governança de Dados**.
 
-### 🛡️ As Sentinelas de Governança (The Lore Sentinels)
-*   **O Inquisidor (`rlb-agent-inquisitor`)**: O guardião da consistência. Detecta furos de roteiro e valida toda nova entrada na Wiki.
-*   **O Historiador (`rlb-agent-historian`)**: Processa registros de sessão e integra arquivos externos (PDF/TXT) à Lore.
+### 🏛️ The Lore Council (Criação e Jogo)
+Estes agentes ajudam você a criar o mundo e narrar o jogo:
+*   **O Cronista (`rlb-agent-chronicler`)**: Oráculo do mundo. Responde sobre a lore (In-Game e Meta-Game) e pesquisa regras externas.
+*   **O Diretor (`rlb-agent-weaver`)**: Roteirista focado em drama. Propõe "beats" narrativos para a próxima sessão e ganchos de aventura baseados nas pontas soltas da Wiki.
+*   **O Arquiteto (`rlb-agent-builder`)**: Especialista em worldbuilding. Cria biografias complexas de NPCs, cidades e mitologias.
+*   **O Tático (`rlb-agent-tactician`)**: Especialista em mecânica e matemática de combate. Pega o esboço do Weaver e gera blocos de estatísticas de monstros e balanceamento de encontros.
+
+### 🛡️ The Lore Sentinels (Governança e Consistência)
+Estes agentes trabalham nos bastidores para que a sua campanha nunca tenha furos:
+*   **O Historiador (`rlb-agent-historian`)**: O Compilador. Ele executa a **Ingestão Universal**: lê os arquivos da pasta `raw/`, extrai entidades e destila isso em notas limpas na pasta `wiki/` com links Obsidian.
+*   **O Inquisidor (`rlb-agent-inquisitor`)**: O "Auditor de Furos de Roteiro". Ele roda em background antes de cada sessão para avisar o Mestre sobre pontas soltas (Ex: "Vocês esqueceram o NPC X vivo na masmorra faz 3 meses") e contradições na Wiki.
 
 ---
 
 ## 🛠️ Workflows Principais
 
-1.  **Gênese (`rlb-workflow-genesis`)**: Criação inicial do mundo e definição das fundações do cenário.
-2.  **Preparação de Sessão (`rlb-workflow-prep-session`)**: Planejamento narrativo e tático para o próximo encontro.
-3.  **Registro de Sessão (`rlb-workflow-session-log`)**: Transforma os eventos da mesa em crônicas permanentes.
-4.  **Downtime (`rlb-workflow-downtime`)**: Simula a passagem do tempo, avançando planos de facções e vilões em background.
-5.  **Backstory (`rlb-workflow-backstory`)**: Analisa a história de novos personagens e sugere ganchos de conexão com o mundo.
-6.  **Conhecimento da Party (`rlb-workflow-party-knowledge`)**: Compila o conhecimento atual dos jogadores em um documento limpo, filtrando segredos de mestre.
+Esses comandos guiam você nos momentos mais importantes da mesa:
 
----
-
-## 📖 Estrutura de Memória
-
-*   `wiki/`: Entidades, Locais, Organizações e Regras (Fundações).
-*   `chronicles/`: Histórico de todas as sessões jogadas.
-*   `handouts/`: Documentos gerados para entrega aos jogadores.
-*   `conflicts/`: Registro de inconsistências pendentes de resolução.
-
----
-
-## 🔧 Tecnologias Utilizadas
-
-*   **Linguagem:** Markdown e Python.
-*   **Engine:** Gemini CLI Framework.
-*   **Integrações:** Google Web Search e Foundry VTT (JSON Export).
+1.  **Registro de Sessão (`rlb-workflow-session-log`)**: Ao terminar uma partida, não escreva um resumo perfeito. Apenas "despeje" as ideias no chat. O agente vai te entrevistar para tapar os buracos, gerar um relatório perfeito na pasta `raw/` e iniciar a Ingestão Universal na Wiki.
+2.  **Preparação de Sessão (`rlb-workflow-prep-session`)**: O momento em que o Mestre senta para planejar o próximo jogo. 
+    *   *Passo 0:* O Inquisitor entrega a "Auditoria Matinal", lembrando de furos e pendências da última sessão.
+    *   *Passos Seguintes:* O Weaver cria o drama da sessão e o Tactician insere os monstros e armadilhas no roteiro.
+3.  **Gênese (`rlb-workflow-genesis`)**: Usado no dia 0. Criação inicial do mundo, tom e fundações da campanha.
+4.  **Conhecimento da Party (`rlb-workflow-party-knowledge`)**: Compila um documento limpo do que os heróis já descobriram, removendo os segredos que só o Mestre sabe. Excelente handout para enviar aos jogadores.
 
 ---
 
 ## 📜 Licença
 
-Este projeto está sob a licença [MIT](LICENSE).
+Este projeto está sob a licença [MIT](LICENSE). Desenvolvido para tirar o peso dos ombros do Mestre e colocar o foco de volta na diversão da mesa.
