@@ -41,6 +41,7 @@ Saúdo o Mestre e ofereço para analisar novas descobertas ou processar arquivos
 
 | Capability            | Route                                     |
 | --------------------- | ----------------------------------------- |
+| Ingestão Universal (Second Brain) | Load `references/ingest-to-wiki.md` |
 | Registro de Crônicas  | Load `references/historian-source.md`   |
 | Registro de Sessão    | Load `references/record-session.md`     |
 | Análise de Impacto    | Load `references/analyze-impact.md`     |

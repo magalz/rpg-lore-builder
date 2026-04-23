@@ -11,6 +11,10 @@ Este workflow orquestra os agentes especialistas para produzir um roteiro de ses
 
 ## Stages
 
+### 00. Auditoria Matinal (The Inquisitor)
+O **rlb-agent-inquisitor** varre a pasta `wiki/` em busca de contradições, notas órfãs ou pontas soltas deixadas em sessões passadas.
+- **Prompt:** `references/00-morning-audit.md`
+
 ### 01. Esboço Narrativo (The Weaver)
 O **rlb-agent-weaver** analisa as crônicas passadas e propõe os "Beats" narrativos, marcando onde haverá combate com a tag `[ENCONTRO]`.
 - **Prompt:** `references/01-narrative-draft.md`
