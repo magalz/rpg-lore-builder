@@ -9,6 +9,11 @@ if (-not (Test-Path "backend\.venv")) {
     .\.venv\Scripts\Activate.ps1
     pip install -r requirements.txt
     cd ..
+} else {
+    cd backend
+    .\.venv\Scripts\Activate.ps1
+    pip install -r requirements.txt
+    cd ..
 }
 
 # Verifica modulos do Frontend

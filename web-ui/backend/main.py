@@ -8,7 +8,9 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, ChatSession, Content, Part
 from dotenv import load_dotenv
 
-import google.auth
+from google.cloud import service_usage_v1, resourcemanager_v3
+from googleapiclient.discovery import build
+from google.auth.transport.requests import Request
 
 load_dotenv()
 
@@ -18,18 +20,9 @@ WIKI_PATH = os.path.join(PROJECT_ROOT, "_bmad/memory/rlb/wiki")
 SKILLS_PATH = os.path.join(PROJECT_ROOT, "skills")
 
 def get_gcp_config():
+    # Prioridade absoluta para o que o mestre salvou no .env
     project = os.getenv("GCP_PROJECT_ID")
-    location = os.getenv("GCP_LOCATION", "us-central1")
-    
-    if not project:
-        try:
-            # Try to auto-detect from environment/gcloud
-            credentials, project_id = google.auth.default()
-            project = project_id
-            print(f"Auto-detected GCP Project: {project}")
-        except Exception:
-            project = None
-            
+    location = os.getenv("GCP_LOCATION", "global")
     return project, location
 
 GCP_PROJECT, GCP_LOCATION = get_gcp_config()
@@ -39,12 +32,107 @@ if GCP_PROJECT:
 
 app = FastAPI(title="The Lore Sanctum API")
 
+@app.get("/api/auth/projects")
+async def list_projects():
+    try:
+        client = resourcemanager_v3.ProjectsClient()
+        projects = client.search_projects()
+        return [{"id": p.project_id, "name": p.display_name} for p in projects]
+    except Exception as e:
+        print(f"Error listing projects: {e}")
+        return []
+
 @app.get("/api/auth/status")
 async def auth_status():
-    project, _ = get_gcp_config()
-    if not project:
-        return {"authenticated": False, "reason": "No Project ID detected. Run 'gcloud auth application-default login'"}
-    return {"authenticated": True, "project": project}
+    user_email = None
+    project_id = os.getenv("GCP_PROJECT_ID") # Apenas o que o mestre salvou manualmente
+    
+    try:
+        import google.auth
+        from google.auth.transport.requests import Request
+        # Pegamos as credenciais, mas ignoramos o 'detected_project' para forçar o .env
+        credentials, _ = google.auth.default(
+            scopes=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/cloud-platform']
+        )
+        
+        # Tenta pegar o e-mail. Se der 403, o usuário está logado, mas o projeto atual está sem permissão.
+        try:
+            auth_request = Request()
+            credentials.refresh(auth_request)
+            service = build('oauth2', 'v2', credentials=credentials)
+            user_info = service.userinfo().get().execute()
+            user_email = user_info.get('email')
+        except Exception as e:
+            print(f"Aviso: Não foi possível obter o e-mail (provavelmente falta de permissão no projeto de cota): {e}")
+            user_email = "Usuário Logado (E-mail indisponível)"
+
+    except Exception as e:
+        print(f"Erro de autenticação/login: {e}")
+        return {"authenticated": False, "reason": "AUTH_REQUIRED", "message": "Login required."}
+
+    # Só retornamos 'authenticated: True' se houver um projeto salvo no .env
+    if not project_id:
+        return {"authenticated": False, "reason": "NO_PROJECT", "message": "No Project ID detected.", "email": user_email}
+    
+    return {"authenticated": True, "project": project_id, "email": user_email}
+
+class ProjectRequest(BaseModel):
+    project_id: str
+
+@app.post("/api/auth/project")
+async def update_project(request: ProjectRequest):
+    global GCP_PROJECT
+    
+    print(f"Ativando APIs necessárias para o projeto {request.project_id}...")
+    try:
+        import google.auth
+        credentials, _ = google.auth.default(
+            scopes=['https://www.googleapis.com/auth/cloud-platform']
+        )
+        client = service_usage_v1.ServiceUsageClient(credentials=credentials)
+        
+        # O formato para habilitar é: projects/{project_number_or_id}/services/{service_name}
+        services = ["serviceusage.googleapis.com", "aiplatform.googleapis.com"]
+        for service_name in services:
+            print(f"Habilitando {service_name}...")
+            # Usamos o objeto de request para garantir compatibilidade entre versões da biblioteca
+            request_obj = service_usage_v1.EnableServiceRequest(
+                name=f"projects/{request.project_id}/services/{service_name}"
+            )
+            operation = client.enable_service(request=request_obj)
+            # Aguarda a operação terminar (pode levar alguns segundos)
+            operation.result()
+            
+    except Exception as e:
+        error_detail = str(e)
+        print(f"Erro ao ativar APIs via SDK: {error_detail}")
+        raise HTTPException(status_code=500, detail=f"Erro ao configurar Google Cloud: {error_detail}")
+
+    # 2. Update .env file
+    env_path = os.path.join(os.path.dirname(__file__), ".env")
+    lines = []
+    found = False
+    if os.path.exists(env_path):
+        with open(env_path, "r") as f:
+            for line in f:
+                if line.startswith("GCP_PROJECT_ID="):
+                    lines.append(f"GCP_PROJECT_ID={request.project_id}\n")
+                    found = True
+                else:
+                    lines.append(line)
+    
+    if not found:
+        lines.append(f"GCP_PROJECT_ID={request.project_id}\n")
+    
+    with open(env_path, "w") as f:
+        f.writelines(lines)
+    
+    # 3. Reload in current session
+    os.environ["GCP_PROJECT_ID"] = request.project_id
+    GCP_PROJECT = request.project_id
+    vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
+    
+    return {"success": True, "project": request.project_id}
 
 app.add_middleware(
     CORSMiddleware,
@@ -164,7 +252,7 @@ async def chat(request: ChatRequest):
     
     try:
         agent_context = get_agent_context(request.agent_id)
-        model = GenerativeModel("gemini-3-flash-preview", system_instruction=agent_context)
+        model = GenerativeModel("gemini-3.1-flash-lite-preview", system_instruction=agent_context)
         
         # Convert history to Part objects
         history = []

@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const os = require('os');
@@ -39,9 +39,10 @@ function createWindow() {
     height: 800,
     title: 'Lore Sanctum',
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      webSecurity: false // Desativa temporariamente para evitar bloqueios de CORS locais
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
+      webSecurity: true 
     },
     backgroundColor: '#0a0a0a',
     autoHideMenuBar: true,
@@ -51,8 +52,9 @@ function createWindow() {
   
   if (isDev) {
     mainWindow.loadURL('http://127.0.0.1:5173');
-    mainWindow.webContents.openDevTools(); 
+    // mainWindow.webContents.openDevTools(); // Comentado para visual de produção
   } else {
+    // Carregar o build quando estiver pronto
     mainWindow.loadURL('http://127.0.0.1:5173'); 
   }
 
@@ -61,7 +63,66 @@ function createWindow() {
   });
 }
 
+let authProcess = null;
+
 app.whenReady().then(() => {
+  ipcMain.handle('start-auth', async () => {
+    return new Promise((resolve) => {
+      console.log('Iniciando fluxo de gcloud...');
+      
+      // Se já houver um processo rodando, mata ele
+      if (authProcess) authProcess.kill();
+
+      authProcess = spawn('gcloud', ['auth', 'application-default', 'login', '--no-launch-browser'], { shell: true });
+      
+      let authUrlSent = false;
+      
+      authProcess.stderr.on('data', (data) => {
+        const output = data.toString();
+        console.log(`[gcloud auth]: ${output}`);
+        
+        const urlMatch = output.match(/https:\/\/accounts\.google\.com[^\s]+/);
+        if (urlMatch && !authUrlSent) {
+          authUrlSent = true;
+          require('electron').shell.openExternal(urlMatch[0]);
+          // Avisa o frontend que estamos aguardando o código
+          resolve({ status: 'AWAITING_CODE', url: urlMatch[0] });
+        }
+      });
+
+      authProcess.on('close', (code) => {
+        console.log(`Processo gcloud fechou com código ${code}`);
+        authProcess = null;
+      });
+    });
+  });
+
+  ipcMain.handle('submit-auth-code', async (event, code) => {
+    return new Promise((resolve) => {
+      if (!authProcess) {
+        resolve({ success: false, error: 'No active auth process' });
+        return;
+      }
+
+      console.log('Enviando código de autorização para o gcloud...');
+      authProcess.stdin.write(code + '\n');
+      
+      // O gcloud costuma fechar após receber o código com sucesso
+      const timeout = setTimeout(() => {
+        resolve({ success: false, error: 'Timeout waiting for gcloud to finish' });
+      }, 10000);
+
+      authProcess.on('close', (exitCode) => {
+        clearTimeout(timeout);
+        if (exitCode === 0) {
+          resolve({ success: true });
+        } else {
+          resolve({ success: false, error: `Exit code ${exitCode}` });
+        }
+      });
+    });
+  });
+
   startPythonBackend();
   createWindow();
 
