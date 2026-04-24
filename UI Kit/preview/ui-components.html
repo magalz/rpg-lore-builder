@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face { font-family:'ANP'; src:url('../fonts/AvenirNextLTPro-Regular.otf') format('opentype'); font-weight:400; }
+  @font-face { font-family:'ANP'; src:url('../fonts/AvenirNextLTPro-Demi.otf') format('opentype'); font-weight:600; }
+  @font-face { font-family:'ANPCn'; src:url('../fonts/AvenirNextLTPro-DemiCn.otf') format('opentype'); font-weight:600; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:#0d0a2e; font-family:'ANP',system-ui,sans-serif; padding:20px; display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start; }
+
+  .group{ display:flex; flex-direction:column; gap:8px; }
+  .label{ font-size:9px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:rgba(78,207,198,.5); margin-bottom:4px; }
+
+  /* Checkbox */
+  .cb{ display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; color:rgba(205,202,233,.7); }
+  .cb-box{ width:16px; height:16px; border:1.5px solid rgba(130,114,221,.6); border-radius:3px; background:transparent; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; }
+  .cb-box.on{ background:rgba(107,79,240,.25); border-color:#7b68e8; }
+  .cb-check{ width:9px; height:5px; border-left:2px solid #c4aeff; border-bottom:2px solid #c4aeff; transform:rotate(-45deg) translate(1px,-1px); }
+
+  /* Radio */
+  .rb{ display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; color:rgba(205,202,233,.7); }
+  .rb-ring{ width:16px; height:16px; border:1.5px solid rgba(130,114,221,.6); border-radius:50%; background:transparent; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; }
+  .rb-ring.on{ border-color:#4ecfc6; }
+  .rb-dot{ width:7px; height:7px; border-radius:50%; background:#4ecfc6; box-shadow:0 0 6px rgba(78,207,198,.7); }
+
+  /* Toggle */
+  .toggle{ width:38px; height:20px; border-radius:10px; border:1px solid rgba(130,114,221,.5); background:rgba(13,10,46,.8); position:relative; cursor:pointer; transition:all .25s; }
+  .toggle.on{ background:rgba(78,207,198,.18); border-color:rgba(78,207,198,.6); box-shadow:0 0 8px rgba(78,207,198,.25); }
+  .toggle-knob{ position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:rgba(136,116,204,.7); transition:all .25s; }
+  .toggle.on .toggle-knob{ left:20px; background:#4ecfc6; box-shadow:0 0 6px rgba(78,207,198,.8); }
+
+  /* Select / Dropdown */
+  .select-wrap{ position:relative; width:180px; }
+  .select-btn{ width:100%; background:rgba(13,10,46,.8); border:1px solid rgba(130,114,221,.5); border-radius:4px; padding:8px 12px; color:rgba(205,202,233,.8); font-family:'ANP',sans-serif; font-size:13px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; transition:all .15s; }
+  .select-btn:hover{ border-color:rgba(78,207,198,.5); }
+  .select-arrow{ font-size:9px; color:rgba(78,207,198,.6); }
+  .select-menu{ position:absolute; top:calc(100% + 4px); left:0; width:100%; background:rgba(13,10,46,.95); border:1px solid rgba(78,207,198,.25); border-radius:4px; backdrop-filter:blur(16px); overflow:hidden; z-index:10; }
+  .select-opt{ padding:8px 12px; font-size:13px; color:rgba(205,202,233,.7); cursor:pointer; transition:all .12s; }
+  .select-opt:hover{ background:rgba(78,207,198,.07); color:#4ecfc6; }
+  .select-opt.sel{ color:#c4aeff; background:rgba(107,79,240,.1); }
+
+  /* Input */
+  .inp{ background:rgba(13,10,46,.7); border:1px solid rgba(130,114,221,.4); border-radius:4px; padding:9px 12px; color:#eae9ff; font-family:'ANP',sans-serif; font-size:13px; outline:none; width:180px; transition:all .15s; }
+  .inp:focus{ border-color:rgba(78,207,198,.55); box-shadow:0 0 8px rgba(78,207,198,.12); }
+  .inp::placeholder{ color:rgba(205,202,233,.3); }
+
+  /* Slider */
+  .slider{ -webkit-appearance:none; width:180px; height:4px; border-radius:2px; background:linear-gradient(90deg,rgba(78,207,198,.7) 60%, rgba(130,114,221,.25) 60%); outline:none; cursor:pointer; }
+  .slider::-webkit-slider-thumb{ -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#4ecfc6; box-shadow:0 0 8px rgba(78,207,198,.6); border:2px solid rgba(13,10,46,.9); cursor:pointer; }
+
+  /* Tooltip */
+  .tooltip-wrap{ position:relative; display:inline-flex; }
+  .tooltip-trigger{ background:rgba(107,79,240,.12); border:1px solid rgba(130,114,221,.45); border-radius:4px; padding:7px 14px; color:#c4aeff; font-size:13px; cursor:default; font-weight:600; }
+  .tooltip-box{ position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:rgba(13,10,46,.95); border:1px solid rgba(78,207,198,.25); border-radius:4px; padding:7px 10px; font-size:11px; color:rgba(205,202,233,.8); white-space:nowrap; backdrop-filter:blur(12px); pointer-events:none; }
+  .tooltip-box::after{ content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:rgba(78,207,198,.25); }
+
+  /* Tag input */
+  .tag-row{ display:flex; flex-wrap:wrap; gap:5px; align-items:center; background:rgba(13,10,46,.7); border:1px solid rgba(130,114,221,.4); border-radius:4px; padding:6px 8px; width:220px; }
+  .tag{ display:inline-flex; align-items:center; gap:4px; background:rgba(107,79,240,.15); border:1px solid rgba(130,114,221,.4); border-radius:9999px; padding:2px 9px; font-size:11px; color:#bda5ff; font-family:'ANPCn',sans-serif; font-weight:600; }
+  .tag-x{ color:rgba(196,174,255,.45); cursor:pointer; font-size:10px; }
+  .tag-input{ background:transparent; border:none; outline:none; color:rgba(205,202,233,.6); font-size:12px; font-family:'ANP',sans-serif; width:60px; }
+</style>
+</head>
+<body>
+
+<div class="group">
+  <div class="label">Checkboxes</div>
+  <label class="cb"><div class="cb-box on"><div class="cb-check"></div></div>Cronista ativo</label>
+  <label class="cb"><div class="cb-box on"><div class="cb-check"></div></div>Inquisidor ativo</label>
+  <label class="cb"><div class="cb-box"></div>Historiador ativo</label>
+</div>
+
+<div class="group">
+  <div class="label">Radio</div>
+  <label class="rb"><div class="rb-ring on"><div class="rb-dot"></div></div>Português</label>
+  <label class="rb"><div class="rb-ring"></div>English</label>
+  <label class="rb"><div class="rb-ring"></div>Español</label>
+</div>
+
+<div class="group">
+  <div class="label">Toggles</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="toggle on"><div class="toggle-knob"></div></div>
+    <span style="font-size:13px;color:rgba(205,202,233,.65)">Sons ativados</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="toggle"><div class="toggle-knob"></div></div>
+    <span style="font-size:13px;color:rgba(205,202,233,.4)">Scanlines</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="toggle on"><div class="toggle-knob"></div></div>
+    <span style="font-size:13px;color:rgba(205,202,233,.65)">Notificações</span>
+  </div>
+</div>
+
+<div class="group">
+  <div class="label">Select / Dropdown</div>
+  <div class="select-wrap">
+    <div class="select-btn"><span>Cronista</span><span class="select-arrow">▼</span></div>
+    <div class="select-menu">
+      <div class="select-opt sel">Cronista</div>
+      <div class="select-opt">Tecelão</div>
+      <div class="select-opt">Arquiteto</div>
+      <div class="select-opt">Inquisidor</div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="label">Text Input</div>
+  <input class="inp" placeholder="Nome do NPC…" value="Aldric von Halstein">
+  <input class="inp" placeholder="Localização…" style="margin-top:4px">
+</div>
+
+<div class="group">
+  <div class="label">Slider</div>
+  <span style="font-size:11px;color:rgba(78,207,198,.55);margin-bottom:2px">Volume de sons · 60%</span>
+  <input type="range" class="slider" value="60">
+</div>
+
+<div class="group">
+  <div class="label">Tooltip</div>
+  <div class="tooltip-wrap">
+    <div class="tooltip-trigger">Inquisidor</div>
+    <div class="tooltip-box">Auditor implacável de inconsistências</div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="label">Tag Input</div>
+  <div class="tag-row">
+    <div class="tag">NPC <span class="tag-x">✕</span></div>
+    <div class="tag">Sessão 7 <span class="tag-x">✕</span></div>
+    <input class="tag-input" placeholder="+ tag">
+  </div>
+</div>
+
+</body>
+</html>

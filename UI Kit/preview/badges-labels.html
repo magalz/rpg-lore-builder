@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face { font-family: 'Avenir Next LT Pro'; src: url('../fonts/AvenirNextLTPro-Demi.otf') format('opentype'); font-weight: 600; }
+  @font-face { font-family: 'Avenir Next LT Pro Cn'; src: url('../fonts/AvenirNextLTPro-DemiCn.otf') format('opentype'); font-weight: 600; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0b1c; font-family: 'Avenir Next LT Pro', system-ui, sans-serif; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(205,202,233,0.4); }
+
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; border: 1px solid transparent; font-family: 'Avenir Next LT Pro Cn', inherit; }
+  .badge-purple { background: rgba(107,79,240,0.15); border-color: rgba(130,114,221,0.5); color: #bda5ff; }
+  .badge-teal   { background: rgba(40,132,118,0.15); border-color: rgba(72,255,218,0.35); color: #48ffda; }
+  .badge-red    { background: rgba(139,0,0,0.15); border-color: rgba(220,50,50,0.4); color: rgba(255,120,120,0.9); }
+  .badge-muted  { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); color: rgba(205,202,233,0.5); }
+  .badge-dot    { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-family: 'Avenir Next LT Pro Cn', inherit; }
+  .tag-npc      { background: rgba(107,79,240,0.12); color: #948fff; }
+  .tag-location { background: rgba(40,132,118,0.12); color: #06bc98; }
+  .tag-event    { background: rgba(212,175,55,0.12); color: #d4af37; }
+  .tag-faction  { background: rgba(139,0,0,0.12); color: rgba(255,120,120,0.8); }
+
+  .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(205,202,233,0.6); }
+</style>
+</head>
+<body>
+  <div class="section-label">Badges</div>
+  <div class="row">
+    <span class="badge badge-purple"><span class="badge-dot" style="background:#7b68e8"></span>Conselho</span>
+    <span class="badge badge-teal"><span class="badge-dot" style="background:#48ffda"></span>Compilado</span>
+    <span class="badge badge-red"><span class="badge-dot" style="background:rgba(220,50,50,0.8)"></span>Inconsistência</span>
+    <span class="badge badge-muted">Rascunho</span>
+  </div>
+
+  <div class="section-label">Codex Tags</div>
+  <div class="row">
+    <span class="tag tag-npc">NPC</span>
+    <span class="tag tag-location">Local</span>
+    <span class="tag tag-event">Evento</span>
+    <span class="tag tag-faction">Facção</span>
+  </div>
+
+  <div class="section-label">Status Indicators</div>
+  <div class="row">
+    <span class="status"><span style="width:8px;height:8px;border-radius:50%;background:#48ffda;box-shadow:0 0 6px #48ffda"></span>Conectado</span>
+    <span class="status"><span style="width:8px;height:8px;border-radius:50%;background:#7b68e8;animation:pulse 1.5s infinite"></span>Processando</span>
+    <span class="status"><span style="width:8px;height:8px;border-radius:50%;background:rgba(220,50,50,0.8)"></span>Erro de Auth</span>
+  </div>
+
+  <div class="section-label">Agent Role Labels</div>
+  <div class="row">
+    <span class="badge badge-purple">Cronista</span>
+    <span class="badge badge-purple">Tecelão</span>
+    <span class="badge badge-purple">Arquiteto</span>
+    <span class="badge badge-red">Inquisidor</span>
+    <span class="badge badge-teal">Estrategista</span>
+    <span class="badge badge-muted">Historiador</span>
+  </div>
+</body>
+</html>

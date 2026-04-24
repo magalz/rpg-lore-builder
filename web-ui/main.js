@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, shell } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const os = require('os');
@@ -10,7 +10,7 @@ let pythonProcess;
 function startPythonBackend() {
   const backendPath = path.join(__dirname, 'backend');
   const isWindows = os.platform() === 'win32';
-  const venvPython = isWindows 
+  const venvPython = isWindows
     ? path.join(backendPath, '.venv', 'Scripts', 'python.exe')
     : path.join(backendPath, '.venv', 'bin', 'python');
 
@@ -48,13 +48,29 @@ function createWindow() {
   });
 
   const isDev = process.env.NODE_ENV === 'development';
-  
+
   if (isDev) {
     mainWindow.loadURL('http://127.0.0.1:5173');
-    mainWindow.webContents.openDevTools(); 
+    mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadURL('http://127.0.0.1:5173'); 
+    mainWindow.loadURL('http://127.0.0.1:5173');
   }
+
+  // Intercepta navegação para abrir links externos no navegador do sistema
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url.startsWith('https://aistudio.google.com') || url.startsWith('http') && !url.includes('127.0.0.1')) {
+      event.preventDefault();
+      shell.openExternal(url);
+    }
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http')) {
+      shell.openExternal(url);
+      return { action: 'deny' };
+    }
+    return { action: 'allow' };
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;

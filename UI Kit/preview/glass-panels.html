@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face { font-family: 'Avenir Next LT Pro'; src: url('../fonts/AvenirNextLTPro-Regular.otf') format('opentype'); font-weight: 400; }
+  @font-face { font-family: 'Avenir Next LT Pro'; src: url('../fonts/AvenirNextLTPro-Demi.otf') format('opentype'); font-weight: 600; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: radial-gradient(ellipse at 30% 40%, rgba(51,36,111,0.6) 0%, transparent 50%), radial-gradient(ellipse at 70% 60%, rgba(40,132,118,0.3) 0%, transparent 45%), #0a0b1e; font-family: 'Avenir Next LT Pro', system-ui, sans-serif; padding: 24px; display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; min-height: 300px; }
+  .label { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(78,207,198,0.5); margin-bottom: 8px; }
+
+  /* Glass panel */
+  .glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 8px; border: 1px solid rgba(196,174,255,0.15); padding: 18px 20px; width: 200px; }
+  .glass-light { background: rgba(13,10,46,0.6); }
+  .glass-heavy { background: rgba(8,6,22,0.82); }
+  .glass-teal  { background: rgba(10,26,28,0.7); border-color: rgba(78,207,198,0.2); }
+  .glass-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .glass-body  { font-size: 12px; color: rgba(205,202,233,0.55); line-height: 1.6; }
+
+  /* HUD sidebar panel */
+  .hud-side { width: 200px; background: rgba(13,10,46,0.72); backdrop-filter: blur(20px); border-right: 1px solid rgba(78,207,198,0.18); padding: 16px; }
+  .hud-side-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 4px; margin-bottom: 4px; font-size: 13px; }
+  .hud-side-item.active { background: rgba(107,79,240,0.15); color: #bda5ff; border-left: 2px solid rgba(78,207,198,0.6); }
+  .hud-side-item:not(.active) { color: rgba(205,202,233,0.4); }
+</style>
+</head>
+<body>
+  <div>
+    <div class="label">Glass Light</div>
+    <div class="glass glass-light">
+      <div class="glass-title" style="color:#c4aeff">Codex Ativo</div>
+      <div class="glass-body">Painel semitransparente com blur de 16px. Ideal para overlays e tooltips.</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">Glass Heavy</div>
+    <div class="glass glass-heavy">
+      <div class="glass-title" style="color:#4ecfc6">Configurações</div>
+      <div class="glass-body">Opacidade maior — usado para modais e dialogs críticos.</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">Glass Teal</div>
+    <div class="glass glass-teal">
+      <div class="glass-title" style="color:#4ecfc6">Status da Sessão</div>
+      <div class="glass-body">Variante com tint teal — usado para painéis de status e notificações.</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">HUD Sidebar Glass</div>
+    <div class="hud-side">
+      <div class="hud-side-item active">◈ Gabinete</div>
+      <div class="hud-side-item">◈ Codex</div>
+      <div class="hud-side-item">◈ Rituais</div>
+    </div>
+  </div>
+</body>
+</html>

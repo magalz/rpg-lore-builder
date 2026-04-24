@@ -4,11 +4,8 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import vertexai
-from vertexai.generative_models import GenerativeModel, ChatSession, Content, Part
+import google.generativeai as genai
 from dotenv import load_dotenv
-
-import google.auth
 
 load_dotenv()
 
@@ -17,34 +14,25 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")
 WIKI_PATH = os.path.join(PROJECT_ROOT, "_bmad/memory/rlb/wiki")
 SKILLS_PATH = os.path.join(PROJECT_ROOT, "skills")
 
-def get_gcp_config():
-    project = os.getenv("GCP_PROJECT_ID")
-    location = os.getenv("GCP_LOCATION", "us-central1")
-    
-    if not project:
-        try:
-            # Try to auto-detect from environment/gcloud
-            credentials, project_id = google.auth.default()
-            project = project_id
-            print(f"Auto-detected GCP Project: {project}")
-        except Exception:
-            project = None
-            
-    return project, location
+# Initialize AI Studio
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL_ID = os.getenv("GEMINI_MODEL_ID", "gemini-1.5-flash")
 
-GCP_PROJECT, GCP_LOCATION = get_gcp_config()
+def configure_genai(api_key: str):
+    global GEMINI_API_KEY
+    GEMINI_API_KEY = api_key
+    genai.configure(api_key=api_key)
 
-if GCP_PROJECT:
-    vertexai.init(project=GCP_PROJECT, location=GCP_LOCATION)
+if GEMINI_API_KEY:
+    configure_genai(GEMINI_API_KEY)
 
 app = FastAPI(title="The Lore Sanctum API")
 
 @app.get("/api/auth/status")
 async def auth_status():
-    project, _ = get_gcp_config()
-    if not project:
-        return {"authenticated": False, "reason": "No Project ID detected. Run 'gcloud auth application-default login'"}
-    return {"authenticated": True, "project": project}
+    if not os.getenv("GEMINI_API_KEY"):
+        return {"authenticated": False, "reason": "No GEMINI_API_KEY detected in .env"}
+    return {"authenticated": True}
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,6 +47,48 @@ class Agent(BaseModel):
     name: str
     description: str
     icon: Optional[str] = "Brain"
+
+class AuthConfigureRequest(BaseModel):
+    api_key: str
+    model_id: str
+
+@app.post("/api/auth/configure")
+async def configure_auth(request: AuthConfigureRequest):
+    try:
+        # Update .env file
+        env_path = os.path.join(os.path.dirname(__file__), ".env")
+        lines = []
+        key_found = False
+        model_found = False
+        
+        if os.path.exists(env_path):
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("GEMINI_API_KEY="):
+                        lines.append(f"GEMINI_API_KEY={request.api_key}\n")
+                        key_found = True
+                    elif line.startswith("GEMINI_MODEL_ID="):
+                        lines.append(f"GEMINI_MODEL_ID={request.model_id}\n")
+                        model_found = True
+                    else:
+                        lines.append(line)
+        
+        if not key_found:
+            lines.append(f"GEMINI_API_KEY={request.api_key}\n")
+        if not model_found:
+            lines.append(f"GEMINI_MODEL_ID={request.model_id}\n")
+            
+        with open(env_path, "w", encoding="utf-8") as f:
+            f.writelines(lines)
+            
+        # Update runtime config
+        global GEMINI_MODEL_ID
+        GEMINI_MODEL_ID = request.model_id
+        configure_genai(request.api_key)
+        
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 class WikiNode(BaseModel):
     name: str
@@ -159,18 +189,18 @@ def get_agent_context(agent_id: str) -> str:
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
-    if not GCP_PROJECT:
-        raise HTTPException(status_code=500, detail="GCP_PROJECT_ID not configured in .env")
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail="GEMINI_API_KEY not configured in .env")
     
     try:
         agent_context = get_agent_context(request.agent_id)
-        model = GenerativeModel("gemini-3-flash-preview", system_instruction=agent_context)
+        model = genai.GenerativeModel(GEMINI_MODEL_ID, system_instruction=agent_context)
         
-        # Convert history to Part objects
+        # Convert history for AI Studio format
         history = []
         for h in request.history:
             role = "user" if h["role"] == "user" else "model"
-            history.append(Content(role=role, parts=[Part.from_text(h["content"])]))
+            history.append({"role": role, "parts": [h["content"]]})
         
         chat_session = model.start_chat(history=history)
         response = chat_session.send_message(request.message)
@@ -178,10 +208,10 @@ async def chat(request: ChatRequest):
         return {"response": response.text}
     except Exception as e:
         error_msg = str(e)
-        print(f"Error during Vertex AI call: {error_msg}")
-        if "Default Credentials" in error_msg or "401" in error_msg or "unauthenticated" in error_msg.lower():
-            raise HTTPException(status_code=401, detail="Google Cloud Authentication Required")
-        raise HTTPException(status_code=500, detail=f"Vertex AI Error: {error_msg}")
+        print(f"Error during Gemini API call: {error_msg}")
+        if "API key not valid" in error_msg or "401" in error_msg:
+            raise HTTPException(status_code=401, detail="Invalid GEMINI_API_KEY")
+        raise HTTPException(status_code=500, detail=f"Gemini API Error: {error_msg}")
 
 if __name__ == "__main__":
     import uvicorn

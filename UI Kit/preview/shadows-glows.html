@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face { font-family: 'Avenir Next LT Pro'; src: url('../fonts/AvenirNextLTPro-Demi.otf') format('opentype'); font-weight: 600; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0b1c; font-family: 'Avenir Next LT Pro', system-ui, sans-serif; padding: 24px; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .card { width: 160px; height: 80px; border-radius: 8px; background: #111228; border: 1px solid rgba(130,114,221,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+  .name { font-size: 9px; color: rgba(205,202,233,0.5); letter-spacing: 0.05em; text-align: center; padding: 0 6px; }
+  .title { color: rgba(205,202,233,0.4); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+  <div class="title">Shadows &amp; Glows</div>
+  <div class="row">
+    <div><div class="card" style="box-shadow: inset 0 0 15px 1px rgba(97,27,255,0.25), 0 10px 40px 0 rgba(15,7,49,0.32)"></div><div class="name" style="margin-top:6px">btn-default shadow</div></div>
+    <div><div class="card" style="box-shadow: inset 0 0 15px 1px rgba(97,27,255,0.45), 0 0 7px 0 rgb(107,29,255);border-color:rgb(162,143,249)"></div><div class="name" style="margin-top:6px">btn-hover glow</div></div>
+    <div><div class="card" style="box-shadow: inset 0 0 15px 1px rgba(40,132,118,0.3), 0 0 7px 0 rgba(40,132,118,0.7);border-color:rgba(72,255,218,0.35)"></div><div class="name" style="margin-top:6px">teal glow</div></div>
+    <div><div class="card" style="box-shadow: 0 4px 24px 0 rgba(10,11,28,0.7)"></div><div class="name" style="margin-top:6px">card shadow</div></div>
+    <div><div class="card" style="box-shadow: 0 24px 60px 0 rgba(5,6,14,0.9)"></div><div class="name" style="margin-top:6px">deep shadow</div></div>
+    <div><div class="card" style="background: radial-gradient(circle at 50% 0%, rgba(51,36,111,0.55) 0%, transparent 100%)"></div><div class="name" style="margin-top:6px">hero gradient</div></div>
+    <div><div class="card" style="background: radial-gradient(circle at 50% 50%, rgba(98,235,196,0.18) 0%, transparent 80%)"></div><div class="name" style="margin-top:6px">teal gradient</div></div>
+  </div>
+</body>
+</html>

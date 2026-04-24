@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LORE SANCTUM — HUD UI</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+  /* ANP = Space Grotesk; ANPCn = Space Grotesk 700 condensed via letter-spacing */
+
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+  :root {
+    /* Recalibrated from logo */
+    --void:    #06040f;
+    --bg:      #0d0a2e;
+    --panel:   rgba(13,10,46,0.82);
+    --surface: rgba(18,14,52,0.9);
+    --purple-deep: #1a0d3d;
+    --purple-mid:  #7b68e8;
+    --purple-lt:   #c4aeff;
+    --teal:        #4ecfc6;
+    --teal-bright: #00e8d8;
+    --text-main:   #eae9ff;
+    --text-sec:    rgba(205,202,233,0.68);
+    --text-muted:  rgba(205,202,233,0.38);
+    --border:      rgba(78,207,198,0.22);
+    --border-hi:   rgba(78,207,198,0.6);
+  }
+
+  html, body, #root { height:100%; overflow:hidden; }
+  body { background:var(--bg); color:var(--text-main); font-family:'Space Grotesk',system-ui,sans-serif; }
+  #root { display:flex; flex-direction:column; }
+
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-thumb { background:rgba(78,207,198,0.18); border-radius:2px; }
+
+  /* ── Keyframes ── */
+  @keyframes orbit   { to { transform:rotate(360deg); } }
+  @keyframes orbitR  { to { transform:rotate(-360deg); } }
+  @keyframes gemPulse{ 0%,100%{opacity:.4;transform:scale(.85)} 50%{opacity:1;transform:scale(1)} }
+  @keyframes dotPulse{ 0%,80%,100%{opacity:.3;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
+  @keyframes runeIn  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+  /* Neon border glow pulse */
+  @keyframes neonGlow {
+    0%,100% { box-shadow: 0 0 4px rgba(78,207,198,0.15), inset 0 0 4px rgba(78,207,198,0.05); }
+    50%      { box-shadow: 0 0 14px rgba(78,207,198,0.45), inset 0 0 8px rgba(78,207,198,0.1); }
+  }
+  /* Shimmer sweep */
+  @keyframes shimmer {
+    0%   { background-position:-200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  /* Active nav neon pulse */
+  @keyframes navNeon {
+    0%,100% { border-left-color:rgba(78,207,198,0.5); text-shadow:none; }
+    50%      { border-left-color:#4ecfc6; text-shadow:0 0 8px rgba(78,207,198,0.6); }
+  }
+  /* Corner bracket flash on new message */
+  @keyframes cornerFlash {
+    0%   { opacity:1; }
+    50%  { opacity:0.3; }
+    100% { opacity:1; }
+  }
+  /* Notification gem pulse */
+  @keyframes notifyGem {
+    0%,100% { filter:drop-shadow(0 0 3px rgba(0,232,216,0.4)); }
+    50%      { filter:drop-shadow(0 0 14px rgba(0,232,216,0.9)); }
+  }
+  /* Input border breathe */
+  @keyframes inputBreathe {
+    0%,100% { border-color:rgba(78,207,198,0.22); }
+    50%      { border-color:rgba(78,207,198,0.55); }
+  }
+
+  /* HUD panel corners */
+  .hud-panel { position:relative; background:var(--panel); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid var(--border); }
+  .hud-panel::before,.hud-panel::after,.hud-panel .hi::before,.hud-panel .hi::after {
+    content:''; position:absolute; width:12px; height:12px; border-color:var(--teal); border-style:solid; z-index:2;
+    transition: opacity 0.3s;
+  }
+  .hud-panel::before  { top:-1px;    left:-1px;  border-width:2px 0 0 2px; }
+  .hud-panel::after   { top:-1px;    right:-1px; border-width:2px 2px 0 0; }
+  .hud-panel .hi::before { bottom:-1px; left:-1px;  border-width:0 0 2px 2px; }
+  .hud-panel .hi::after  { bottom:-1px; right:-1px; border-width:0 2px 2px 0; }
+
+  /* Shimmer overlay for panels */
+  .shimmer-panel::after {
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(105deg, transparent 40%, rgba(196,174,255,0.06) 50%, transparent 60%);
+    background-size:200% 100%;
+    animation: shimmer 4s ease-in-out infinite;
+    pointer-events:none; border-radius:inherit; z-index:1;
+  }
+
+  /* Scanline */
+  .scanline::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.12) 2px,rgba(0,0,0,0.12) 3px); pointer-events:none; z-index:10; }
+
+  .hud-label { font-family:'Space Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--teal); opacity:.65; display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .hud-label::after { content:''; flex:1; height:1px; background:var(--border); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback } = React;
+
+/* ── Web Audio Chime ── */
+function playAIChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
+    notes.forEach((freq, i) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const t = ctx.currentTime + i * 0.11;
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.5);
+    });
+    // Subtle reverb tail — lower sine at root
+    const rev = ctx.createOscillator();
+    const revG = ctx.createGain();
+    rev.type = 'sine'; rev.frequency.value = 261.63;
+    revG.gain.setValueAtTime(0, ctx.currentTime + 0.3);
+    revG.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 0.35);
+    revG.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.1);
+    rev.connect(revG); revG.connect(ctx.destination);
+    rev.start(ctx.currentTime + 0.3); rev.stop(ctx.currentTime + 1.2);
+  } catch(e) { /* AudioContext not available */ }
+}
+
+/* ── Icon ── */
+function Icon({ name, size=18, color, style={} }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!ref.current || !window.lucide) return;
+    ref.current.innerHTML = '';
+    const svg = window.lucide.createElement(window.lucide[name] || window.lucide.Circle);
+    svg.setAttribute('width', size); svg.setAttribute('height', size);
+    svg.setAttribute('stroke-width', 1.8);
+    Object.assign(svg.style, { color, display:'block' });
+    ref.current.appendChild(svg);
+  }, [name, size, color]);
+  return <span ref={ref} style={{ display:'inline-flex', alignItems:'center', flexShrink:0, ...style }} />;
+}
+
+/* ── Titlebar ── */
+function Titlebar({ lang, onLangToggle }) {
+  return (
+    <div className="scanline" style={{
+      height:32, background:'rgba(6,4,15,0.97)',
+      borderBottom:'1px solid rgba(78,207,198,0.16)',
+      display:'flex', alignItems:'center', padding:'0 12px',
+      flexShrink:0, userSelect:'none', position:'relative', zIndex:100,
+    }}>
+      <img src="../../assets/logo.png" alt="" style={{ height:18, width:18, objectFit:'contain', marginRight:7, mixBlendMode:'screen' }} />
+      <span style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:600, fontSize:11, letterSpacing:'0.13em', color:'rgba(196,174,255,0.6)', textTransform:'uppercase' }}>LORE SANCTUM</span>
+      <div style={{ flex:1 }}/>
+      <button onClick={onLangToggle} style={{ background:'transparent', border:'1px solid rgba(78,207,198,0.22)', color:'rgba(78,207,198,0.5)', padding:'2px 8px', borderRadius:3, cursor:'pointer', fontFamily:"'Space Grotesk',sans-serif", fontSize:9, fontWeight:600, letterSpacing:'0.1em', marginRight:10 }}>{lang.toUpperCase()}</button>
+      <span style={{ fontFamily:'monospace', fontSize:9, color:'rgba(136,116,204,0.38)', marginRight:12 }}>v2.0.0</span>
+      <div style={{ display:'flex', gap:5 }}>
+        {[['rgba(196,174,255,0.38)','rgba(196,174,255,0.55)'],['rgba(78,207,198,0.38)','rgba(78,207,198,0.55)'],['rgba(200,50,50,0.55)','rgba(200,50,50,0.75)']].map(([bg,b],i)=>(
+          <div key={i} style={{ width:11, height:11, borderRadius:2, background:bg, border:`1px solid ${b}`, cursor:'pointer', transition:'all 0.15s' }}
+            onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.2)'; e.currentTarget.style.filter='brightness(1.4)';}}
+            onMouseLeave={e=>{e.currentTarget.style.transform=''; e.currentTarget.style.filter='';}}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Agents & Nav ── */
+const AGENTS = [
+  { id:'rlb-agent-help',       pt:'Guia',        en:'Guide',       sentinel:false },
+  { id:'rlb-agent-chronicler', pt:'Cronista',     en:'Chronicler',  sentinel:false },
+  { id:'rlb-agent-weaver',     pt:'Tecelão',      en:'Weaver',      sentinel:false },
+  { id:'rlb-agent-builder',    pt:'Arquiteto',    en:'Architect',   sentinel:false },
+  { id:'rlb-agent-tactician',  pt:'Estrategista', en:'Tactician',   sentinel:false },
+  { id:'rlb-agent-historian',  pt:'Historiador',  en:'Historian',   sentinel:true  },
+  { id:'rlb-agent-inquisitor', pt:'Inquisidor',   en:'Inquisitor',  sentinel:true  },
+];
+const NAV = [
+  { id:'chat',    icon:'MessageSquare', pt:'Gabinete do Mestre', en:"Master's Sanctum" },
+  { id:'wiki',    icon:'BookOpen',      pt:'Codex de Lore',      en:'Lore Codex'       },
+  { id:'rituals', icon:'Zap',           pt:'Rituais',            en:'Rituals'          },
+];
+
+/* ── Sidebar ── */
+function Sidebar({ view, onView, agent, onAgent, lang }) {
+  const [hov, setHov] = useState(null);
+  const name = a => lang==='pt' ? a.pt : a.en;
+  return (
+    <aside className="hud-panel shimmer-panel" style={{ width:248, display:'flex', flexDirection:'column', padding:'16px 14px', flexShrink:0, borderRadius:0, borderTop:'none', borderBottom:'none', borderLeft:'none', height:'100%', overflow:'hidden' }}>
+      <div className="hi" style={{ display:'flex', flexDirection:'column', height:'100%' }}>
+        {/* Compass rose decorative */}
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:10 }}>
+          <img src="../../assets/decoratives/compass-rose.svg" width="52" height="52" alt="" style={{ opacity:0.55, filter:'drop-shadow(0 0 6px rgba(78,207,198,0.3))' }} />
+        </div>
+
+        <div className="hud-label">{lang==='pt'?'Navegação':'Navigation'}</div>
+        <nav style={{ display:'flex', flexDirection:'column', gap:3, marginBottom:14 }}>
+          {NAV.map(n => {
+            const active = view===n.id;
+            return (
+              <div key={n.id} onClick={()=>onView(n.id)}
+                onMouseEnter={()=>setHov(n.id)} onMouseLeave={()=>setHov(null)}
+                style={{
+                  display:'flex', alignItems:'center', gap:10,
+                  padding:'9px 10px', borderRadius:4, cursor:'pointer',
+                  color: active ? '#4ecfc6' : hov===n.id ? 'rgba(196,174,255,0.7)' : 'var(--text-muted)',
+                  background: active ? 'rgba(78,207,198,0.07)' : hov===n.id ? 'rgba(196,174,255,0.04)' : 'transparent',
+                  borderLeft: active ? '2px solid rgba(78,207,198,0.7)' : '2px solid transparent',
+                  fontSize:13, transition:'all 0.15s',
+                  animation: active ? 'navNeon 2.5s ease-in-out infinite' : 'none',
+                }}>
+                <Icon name={n.icon} size={16} color={active?'#4ecfc6': hov===n.id?'rgba(196,174,255,0.6)':'rgba(205,202,233,0.35)'} />
+                {lang==='pt'?n.pt:n.en}
+              </div>
+            );
+          })}
+        </nav>
+
+        <img src="../../assets/decoratives/rune-divider.svg" alt="" style={{ width:'100%', opacity:0.45, marginBottom:14 }} />
+
+        <div className="hud-label">{lang==='pt'?'Conselho':'Council'}</div>
+        <div style={{ flex:1, overflowY:'auto', display:'flex', flexDirection:'column', gap:2 }}>
+          {AGENTS.map(a => {
+            const active = agent===a.id;
+            return (
+              <div key={a.id} onClick={()=>onAgent(a.id)}
+                onMouseEnter={e=>{if(!active){e.currentTarget.style.color='rgba(196,174,255,0.7)'; e.currentTarget.style.background='rgba(196,174,255,0.04)';}}}
+                onMouseLeave={e=>{if(!active){e.currentTarget.style.color='var(--text-muted)'; e.currentTarget.style.background='transparent';}}}
+                style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 10px', borderRadius:4, cursor:'pointer', color: active?'#c4aeff':'var(--text-muted)', background: active?'rgba(107,79,240,0.1)':'transparent', fontSize:13, transition:'all 0.15s' }}>
+                <Icon name="Shield" size={13} color={active?'#c4aeff':'rgba(205,202,233,0.28)'} />
+                {name(a)}
+                {a.sentinel && <span style={{ marginLeft:'auto', fontSize:8, fontFamily:"'Space Grotesk',sans-serif", fontWeight:600, letterSpacing:'0.08em', background:'rgba(200,50,50,0.1)', border:'1px solid rgba(200,50,50,0.28)', color:'rgba(255,100,100,0.65)', padding:'1px 5px', borderRadius:9999 }}>SEN</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* ── Runic Loader ── */
+function RunicLoader({ size=52 }) {
+  const c = size/2;
+  return (
+    <div style={{ position:'relative', width:size, height:size }}>
+      {[{s:0,d:'2.2s',c:'rgba(78,207,198,0.8)',r:false},{s:size*.14,d:'1.5s',c:'rgba(136,116,204,0.75)',r:true},{s:size*.32,d:'0.95s',c:'#c4aeff',r:false}].map((ring,i)=>(
+        <div key={i} style={{ position:'absolute', inset:ring.s, borderRadius:'50%', border:'1.5px solid transparent', borderTopColor:ring.c, borderRightColor:ring.r?ring.c:'transparent', animation:`${ring.r?'orbitR':'orbit'} ${ring.d} linear infinite` }} />
+      ))}
+      <div style={{ position:'absolute', inset:size*.42, display:'flex', alignItems:'center', justifyContent:'center', animation:'gemPulse 1.6s ease-in-out infinite' }}>
+        <div style={{ width:size*.16, height:size*.16, background:'#00e8d8', clipPath:'polygon(50% 0%,100% 50%,50% 100%,0% 50%)', boxShadow:'0 0 8px #00e8d8' }} />
+      </div>
+    </div>
+  );
+}
+
+/* ── Message content renderer ── */
+function MsgContent({ text }) {
+  const html = text
+    .replace(/\*\*(.+?)\*\*/g,'<strong style="color:#c4aeff;font-weight:600">$1</strong>')
+    .replace(/`(.+?)`/g,'<code style="font-family:monospace;font-size:11px;color:#00e8d8;background:rgba(0,232,216,0.08);padding:1px 5px;border-radius:2px">$1</code>')
+    .replace(/⚠️/g,'<span style="color:#d4af37">⚠️</span>')
+    .replace(/\*(.+?)\*/g,'<em style="color:rgba(205,202,233,0.55)">$1</em>')
+    .replace(/\n/g,'<br>');
+  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+/* ── Chat View ── */
+const DEMO = [
+  { role:'user', content:'Quem é o NPC Aldric e qual é sua última localização conhecida?' },
+  { role:'ai',   content:'**Aldric von Halstein** — Mercenário renegado, ex-Capitão da `Guarda de Ferro`.\n\nÚltima localização: **Ruínas de Velmoor** (Sessão 7).\n\n⚠️ O Inquisidor sinalizou: *ponta solta crítica — permanece vivo sem arco resolvido.*' },
+];
+
+function ChatView({ agentId, lang }) {
+  const [msgs, setMsgs] = useState(DEMO);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [notify, setNotify] = useState(false);
+  const endRef = useRef(null);
+  const agent = AGENTS.find(a=>a.id===agentId) || AGENTS[0];
+  const aName = lang==='pt'?agent.pt:agent.en;
+
+  useEffect(() => {
+    if (endRef.current) endRef.current.parentNode.scrollTop = endRef.current.offsetTop;
+  }, [msgs, loading]);
+
+  const send = () => {
+    if (!input.trim()) return;
+    const m = input; setInput(''); setLoading(true);
+    setMsgs(p=>[...p,{role:'user',content:m}]);
+    setTimeout(() => {
+      setMsgs(p=>[...p,{role:'ai',content:`*(Simulação — ${aName})*\n\nEsta é uma demonstração. Conecte ao backend para respostas reais do Conselho.`}]);
+      setLoading(false);
+      playAIChime();
+      // Notification gem flash
+      setNotify(true);
+      setTimeout(()=>setNotify(false), 2000);
+    }, 1900);
+  };
+
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', padding:'18px 26px', overflow:'hidden' }}>
+      {/* Agent header */}
+      <div className="hud-panel" style={{ borderRadius:4, padding:'11px 16px', marginBottom:14, flexShrink:0, borderLeft:'2px solid rgba(78,207,198,0.45)', animation:'neonGlow 3s ease-in-out infinite' }}>
+        <div className="hi" style={{ display:'flex', alignItems:'center', gap:12 }}>
+          <Icon name="Shield" size={20} color="#4ecfc6" />
+          <div>
+            <div style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:600, fontSize:13, letterSpacing:'0.1em', color:'#4ecfc6', textTransform:'uppercase' }}>
+              {lang==='pt'?'Consultando':'Consulting'} {aName}
+            </div>
+            <div style={{ fontSize:11, color:'var(--text-muted)', marginTop:1 }}>
+              {lang==='pt'?'Fale, Mestre. O conselho aguarda.':'Speak, Master. The council awaits.'}
+            </div>
+          </div>
+          {/* Notification gem */}
+          {notify && (
+            <div style={{ marginLeft:'auto', animation:'notifyGem 0.4s ease-in-out 3' }}>
+              <img src="../../assets/decoratives/gem.svg" width="16" height="18" alt="" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex:1, overflowY:'auto', display:'flex', flexDirection:'column', gap:12, paddingBottom:12 }}>
+        {msgs.map((m,i)=>(
+          <div key={i} style={{
+            alignSelf:m.role==='user'?'flex-end':'flex-start',
+            maxWidth:'82%', padding:'12px 16px', borderRadius:6,
+            fontSize:13, lineHeight:1.75,
+            animation:'runeIn 0.28s ease',
+            ...(m.role==='user'?{
+              background:'rgba(107,79,240,0.09)',
+              borderRight:'2px solid rgba(78,207,198,0.5)',
+              color:'var(--text-main)',
+            }:{
+              background:'rgba(13,10,46,0.6)',
+              borderLeft:'2px solid rgba(136,116,204,0.4)',
+              color:'rgba(205,202,233,0.82)',
+            }),
+          }}>
+            <MsgContent text={m.content} />
+          </div>
+        ))}
+        {loading && (
+          <div style={{ alignSelf:'flex-start', padding:'16px 20px', borderRadius:6, background:'rgba(13,10,46,0.55)', borderLeft:'2px solid rgba(78,207,198,0.3)', display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+            <RunicLoader size={52}/>
+            <div style={{ display:'flex', gap:5 }}>
+              {[0,.2,.4].map((d,i)=><div key={i} style={{ width:5, height:5, borderRadius:'50%', background:'#7b68e8', animation:`dotPulse 1.2s ${d}s infinite` }}/>)}
+            </div>
+            <div style={{ fontSize:11, color:'rgba(78,207,198,0.55)', letterSpacing:'0.08em' }}>
+              {lang==='pt'?'Consultando o Conselho…':'Consulting the Council…'}
+            </div>
+          </div>
+        )}
+        <div ref={endRef}/>
+      </div>
+
+      {/* Input */}
+      <div className="hud-panel" style={{ borderRadius:6, padding:'10px 14px', display:'flex', gap:10, alignItems:'center', flexShrink:0, marginTop:4, animation:'inputBreathe 3s ease-in-out infinite' }}>
+        <div className="hi" style={{ display:'flex', gap:10, alignItems:'center', width:'100%' }}>
+          <img src="../../assets/decoratives/gem.svg" alt="" style={{ width:14, height:16, opacity:0.5, flexShrink:0 }}/>
+          <input
+            style={{ flex:1, background:'transparent', border:'none', outline:'none', color:'var(--text-main)', fontFamily:"'Space Grotesk',sans-serif", fontSize:13 }}
+            placeholder={`${lang==='pt'?'Pergunte ao':'Ask the'} ${aName}…`}
+            value={input}
+            onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=>e.key==='Enter'&&send()}
+          />
+          <button onClick={send} style={{ background:'rgba(78,207,198,0.1)', border:'1px solid rgba(78,207,198,0.4)', color:'#4ecfc6', padding:'7px 16px', borderRadius:4, cursor:'pointer', fontFamily:"'Space Grotesk',sans-serif", fontSize:12, fontWeight:600, letterSpacing:'0.06em', transition:'all 0.15s', whiteSpace:'nowrap' }}
+            onMouseEnter={e=>{ e.currentTarget.style.background='rgba(78,207,198,0.2)'; e.currentTarget.style.boxShadow='0 0 10px rgba(78,207,198,0.3)'; }}
+            onMouseLeave={e=>{ e.currentTarget.style.background='rgba(78,207,198,0.1)'; e.currentTarget.style.boxShadow='none'; }}>
+            {lang==='pt'?'ENVIAR':'SEND'} ›
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Codex View ── */
+const TREE = [
+  { name:'NPCs', type:'dir', path:'npcs/', children:[
+    { name:'Aldric von Halstein.md', type:'file', path:'npcs/aldric.md'},
+    { name:'Lady Seraphine.md',      type:'file', path:'npcs/seraphine.md'},
+  ]},
+  { name:'Locais', type:'dir', path:'locais/', children:[
+    { name:'Ruínas de Velmoor.md',   type:'file', path:'locais/velmoor.md'},
+    { name:'Arkenhold.md',           type:'file', path:'locais/arkenhold.md'},
+  ]},
+  { name:'Facções', type:'dir', path:'faccoes/', children:[
+    { name:'Guarda de Ferro.md',     type:'file', path:'faccoes/guarda.md'},
+  ]},
+  { name:'Sessões', type:'dir', path:'sessoes/', children:[
+    { name:'Sessão 07 — A Traição.md', type:'file', path:'sessoes/s07.md'},
+  ]},
+];
+const CONTENT = {
+  'npcs/aldric.md':'# Aldric von Halstein\n\n**Tipo:** NPC — Antagonista Ativo\n**Status:** Vivo · Localização desconhecida\n**Última aparição:** [[Sessão 07 — A Traição]]\n\n## Biografia\n\nAldric é um mercenário renegado, antigo Capitão da [[Guarda de Ferro]]. Traiu a Guarda após descobrir corrupção interna.\n\n## Alerta do Inquisidor\n\n⚠️ Permanece vivo sem resolução narrativa — *ponta solta crítica.*',
+};
+function TreeNode({ node, level, onSelect }) {
+  const [open, setOpen] = useState(level===0);
+  const isDir = node.type==='dir';
+  return (
+    <div>
+      <div onClick={()=>isDir?setOpen(!open):onSelect(node)}
+        style={{ display:'flex', alignItems:'center', gap:6, padding:`5px 5px 5px ${level*14+8}px`, cursor:'pointer', fontSize:12, color:isDir?'rgba(78,207,198,0.65)':'var(--text-muted)', borderRadius:3, transition:'all 0.12s' }}
+        onMouseEnter={e=>{e.currentTarget.style.color='#4ecfc6'; e.currentTarget.style.background='rgba(78,207,198,0.05)';}}
+        onMouseLeave={e=>{e.currentTarget.style.color=isDir?'rgba(78,207,198,0.65)':'var(--text-muted)'; e.currentTarget.style.background='transparent';}}>
+        <span style={{ fontSize:8, width:10, color:'#4ecfc6', flexShrink:0, opacity:.65 }}>{isDir?(open?'▼':'▶'):'◈'}</span>
+        {node.name}
+      </div>
+      {isDir&&open&&node.children?.map(c=><TreeNode key={c.path} node={c} level={level+1} onSelect={onSelect}/>)}
+    </div>
+  );
+}
+function renderMd(t){
+  return t
+    .replace(/^# (.+)$/gm,'<h2 style="font-size:18px;font-weight:700;color:#c4aeff;margin:0 0 12px;letter-spacing:0.04em">$1</h2>')
+    .replace(/^## (.+)$/gm,'<h3 style="font-size:12px;font-weight:600;color:rgba(78,207,198,0.75);margin:14px 0 7px;letter-spacing:0.1em;text-transform:uppercase">$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong style="color:#eae9ff;font-weight:600">$1</strong>')
+    .replace(/⚠️/g,'<span style="color:#d4af37">⚠️</span>')
+    .replace(/\[\[(.+?)\]\]/g,'<a style="color:#4ecfc6;text-decoration:none;border-bottom:1px solid rgba(78,207,198,0.28);cursor:pointer">$1</a>')
+    .replace(/\*(.+?)\*/g,'<em style="color:rgba(205,202,233,0.5)">$1</em>')
+    .replace(/\n/g,'<br>');
+}
+function CodexView({ lang }) {
+  const [sel, setSel] = useState(null);
+  const content = sel?(CONTENT[sel.path]||'*Conteúdo não disponível.*'):null;
+  return (
+    <div style={{ flex:1, display:'grid', gridTemplateColumns:'220px 1fr', overflow:'hidden' }}>
+      <div className="hud-panel" style={{ borderRadius:0, borderTop:'none', borderBottom:'none', borderLeft:'none', padding:'14px 10px', overflowY:'auto' }}>
+        <div className="hi">
+          <div className="hud-label">{lang==='pt'?'Índice':'Index'}</div>
+          {TREE.map(n=><TreeNode key={n.path} node={n} level={0} onSelect={setSel}/>)}
+        </div>
+      </div>
+      <div style={{ padding:'24px 32px', overflowY:'auto', lineHeight:1.85, color:'rgba(205,202,233,0.72)', fontSize:13 }}>
+        {content
+          ?<div dangerouslySetInnerHTML={{__html:renderMd(content)}}/>
+          :<div style={{ height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:14, opacity:.35 }}>
+            <img src="../../assets/decoratives/compass-rose.svg" width="64" height="64" alt=""/>
+            <span style={{ fontSize:12, letterSpacing:'0.08em' }}>{lang==='pt'?'Selecione um pergaminho':'Select a scroll'}</span>
+          </div>}
+      </div>
+    </div>
+  );
+}
+
+/* ── Rituals View ── */
+function RitualsView({ lang }) {
+  const wf = [
+    { pt:'Registro de Sessão', en:'Session Log',     pt_d:'Dump da sessão → Ingestão Universal.',       en_d:'Session dump → Universal Ingestion into Codex.' },
+    { pt:'Preparação de Sessão', en:'Session Prep',  pt_d:'Auditoria matinal + roteiro dramático.',     en_d:'Morning audit + Weaver drama + Tactician.' },
+    { pt:'Gênese', en:'Genesis',                     pt_d:'Criação inicial do mundo e fundações.',      en_d:'Initial world creation and foundations.' },
+    { pt:'Conhecimento da Party', en:'Party Intel',  pt_d:'Handout do que os heróis descobriram.',      en_d:"Handout of the party's discoveries." },
+  ];
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'2.5rem', gap:'1.2rem' }}>
+      <RunicLoader size={64}/>
+      <div style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:600, fontSize:18, color:'#4ecfc6', letterSpacing:'0.12em', textTransform:'uppercase', marginTop:8 }}>
+        {lang==='pt'?'Câmara de Rituais':'Ritual Chamber'}
+      </div>
+      <img src="../../assets/decoratives/rune-divider.svg" alt="" style={{ width:300, opacity:.4 }}/>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:12, maxWidth:500, width:'100%' }}>
+        {wf.map((w,i)=>(
+          <div key={i} className="hud-panel shimmer-panel" style={{ borderRadius:6, padding:'15px', cursor:'default' }}>
+            <div className="hi">
+              <div style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:600, fontSize:11, color:'#c4aeff', letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:6 }}>{lang==='pt'?w.pt:w.en}</div>
+              <div style={{ fontSize:11, color:'var(--text-muted)', lineHeight:1.6 }}>{lang==='pt'?w.pt_d:w.en_d}</div>
+              <div style={{ marginTop:8, fontSize:8, fontFamily:"'Space Grotesk',sans-serif", fontWeight:600, letterSpacing:'0.12em', color:'rgba(78,207,198,0.38)', border:'1px solid rgba(78,207,198,0.15)', padding:'2px 8px', borderRadius:9999, display:'inline-block' }}>
+                {lang==='pt'?'EM BREVE':'SOON'}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Splash ── */
+function Splash({ lang }) {
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:9999, background:'radial-gradient(ellipse at 50% 30%, rgba(45,26,110,0.8) 0%, transparent 60%), #06040f', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:20 }}>
+      <img src="../../assets/logo.png" alt="RPG Lore Builder" style={{ width:96, height:96, objectFit:'contain', mixBlendMode:'screen', filter:'drop-shadow(0 0 24px rgba(78,207,198,0.5)) drop-shadow(0 0 48px rgba(107,79,240,0.3))', animation:'gemPulse 2s ease-in-out infinite' }}/>
+      <RunicLoader size={58}/>
+      <div style={{ display:'flex', gap:5, marginTop:4 }}>
+        {[0,.22,.44].map((d,i)=><div key={i} style={{ width:5,height:5,borderRadius:'50%',background:'#7b68e8',animation:`dotPulse 1.2s ${d}s infinite` }}/>)}
+      </div>
+      <span style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:600, fontSize:13, color:'rgba(196,174,255,0.6)', letterSpacing:'0.15em', textTransform:'uppercase' }}>
+        {lang==='pt'?'Despertando o Conselho…':'Awakening the Council…'}
+      </span>
+    </div>
+  );
+}
+
+/* ── App ── */
+function App() {
+  const [lang, setLang] = useState(() => localStorage.getItem('rlb-lang')||'pt');
+  const [view, setView] = useState(() => localStorage.getItem('rlb-view')||'chat');
+  const [agent, setAgent] = useState(() => localStorage.getItem('rlb-agent')||'rlb-agent-help');
+  const [ready, setReady] = useState(false);
+
+  useEffect(()=>{ const t=setTimeout(()=>setReady(true),1500); return()=>clearTimeout(t); },[]);
+  useEffect(()=>{ localStorage.setItem('rlb-lang',lang); },[lang]);
+  useEffect(()=>{ localStorage.setItem('rlb-view',view); },[view]);
+  useEffect(()=>{ localStorage.setItem('rlb-agent',agent); },[agent]);
+
+  if (!ready) return <Splash lang={lang}/>;
+
+  const mainBg = view==='chat'
+    ?'radial-gradient(ellipse at 50% 0%, rgba(45,26,110,0.45) 0%, transparent 55%), var(--bg)'
+    :view==='rituals'
+    ?'radial-gradient(ellipse at 50% 50%, rgba(40,132,118,0.1) 0%, transparent 55%), var(--bg)'
+    :'var(--bg)';
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden' }}>
+      <Titlebar lang={lang} onLangToggle={()=>setLang(l=>l==='pt'?'en':'pt')}/>
+      <div style={{ display:'flex', flex:1, overflow:'hidden' }}>
+        <Sidebar view={view} onView={setView} agent={agent} onAgent={setAgent} lang={lang}/>
+        <main style={{ flex:1, overflow:'hidden', display:'flex', background:mainBg, position:'relative' }}>
+          {/* Global scanline */}
+          <div style={{ position:'absolute', inset:0, background:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 3px)', pointerEvents:'none', zIndex:5 }}/>
+          <div style={{ flex:1, display:'flex', overflow:'hidden', position:'relative', zIndex:1 }}>
+            {view==='chat'    && <ChatView    agentId={agent} lang={lang}/>}
+            {view==='wiki'    && <CodexView   lang={lang}/>}
+            {view==='rituals' && <RitualsView lang={lang}/>}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

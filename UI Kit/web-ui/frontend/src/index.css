@@ -25,10 +25,7 @@ body {
   height: 100vh;
 }
 
-h1,
-h2,
-h3,
-h4 {
+h1, h2, h3, h4 {
   font-family: var(--font-serif);
   color: var(--gold-primary);
   text-transform: uppercase;
@@ -77,8 +74,7 @@ h4 {
   color: var(--text-muted);
 }
 
-.nav-item:hover,
-.nav-item.active {
+.nav-item:hover, .nav-item.active {
   background-color: rgba(212, 175, 55, 0.1);
   color: var(--gold-primary);
 }
@@ -89,7 +85,6 @@ h4 {
   flex-direction: column;
   background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
   position: relative;
-  overflow-y: auto;
 }
 
 /* Chat Layout */
@@ -185,10 +180,5 @@ button.send-btn:hover {
   line-height: 1.8;
 }
 
-.markdown-body h1 {
-  margin-top: 0;
-}
-
-.markdown-body p {
-  margin-bottom: 1rem;
-}
+.markdown-body h1 { margin-top: 0; }
+.markdown-body p { margin-bottom: 1rem; }

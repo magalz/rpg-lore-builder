@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face { font-family: 'Avenir Next LT Pro'; src: url('../fonts/AvenirNextLTPro-Demi.otf') format('opentype'); font-weight: 600; }
+  @font-face { font-family: 'Avenir Next LT Pro'; src: url('../fonts/AvenirNextLTPro-Regular.otf') format('opentype'); font-weight: 400; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0b1c; font-family: 'Avenir Next LT Pro', system-ui, sans-serif; padding: 20px; }
+  .row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .chip { display: flex; align-items: center; gap: 8px; background: #111228; border: 1px solid rgba(130,114,221,0.2); border-radius: 6px; padding: 8px 12px; min-width: 190px; }
+  .dot { width: 24px; height: 24px; border-radius: 4px; flex-shrink: 0; }
+  .info { display: flex; flex-direction: column; gap: 1px; }
+  .name { font-size: 10px; font-weight: 600; color: rgba(234,233,255,0.9); letter-spacing: 0.05em; }
+  .val  { font-size: 9px; color: rgba(205,202,233,0.45); }
+  .section-title { color: rgba(205,202,233,0.5); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; margin-top: 14px; }
+</style>
+</head>
+<body>
+  <div class="section-title">Text</div>
+  <div class="row">
+    <div class="chip"><div class="dot" style="background:#eae9ff"></div><div class="info"><div class="name">text-primary</div><div class="val">#eae9ff</div></div></div>
+    <div class="chip"><div class="dot" style="background:#cdcae9"></div><div class="info"><div class="name">text-secondary</div><div class="val">#cdcae9</div></div></div>
+    <div class="chip"><div class="dot" style="background:rgba(205,202,233,0.5);border:1px solid rgba(130,114,221,0.2)"></div><div class="info"><div class="name">text-muted</div><div class="val">rgba(205,202,233,0.5)</div></div></div>
+    <div class="chip"><div class="dot" style="background:#bda5ff"></div><div class="info"><div class="name">text-accent</div><div class="val">#bda5ff</div></div></div>
+    <div class="chip"><div class="dot" style="background:#b9ffe9"></div><div class="info"><div class="name">text-teal</div><div class="val">#b9ffe9</div></div></div>
+  </div>
+
+  <div class="section-title">Borders</div>
+  <div class="row">
+    <div class="chip"><div class="dot" style="background:rgba(130,114,221,0.68)"></div><div class="info"><div class="name">border-default</div><div class="val">rgba(130,114,221,0.68)</div></div></div>
+    <div class="chip"><div class="dot" style="background:rgba(130,114,221,0.28)"></div><div class="info"><div class="name">border-subtle</div><div class="val">rgba(130,114,221,0.28)</div></div></div>
+    <div class="chip"><div class="dot" style="background:rgb(162,143,249)"></div><div class="info"><div class="name">border-glow</div><div class="val">#a28ff9</div></div></div>
+    <div class="chip"><div class="dot" style="background:rgba(72,255,218,0.35)"></div><div class="info"><div class="name">border-teal</div><div class="val">rgba(72,255,218,0.35)</div></div></div>
+  </div>
+
+  <div class="section-title">Glows</div>
+  <div class="row">
+    <div class="chip"><div class="dot" style="background:#6b4ff0;box-shadow:0 0 8px 2px rgba(107,29,255,0.7)"></div><div class="info"><div class="name">glow-purple-sm</div><div class="val">0 0 7px rgba(107,29,255,0.6)</div></div></div>
+    <div class="chip"><div class="dot" style="background:#6b4ff0;box-shadow:0 0 15px 3px rgba(97,27,255,0.5)"></div><div class="info"><div class="name">glow-purple-md</div><div class="val">inset 0 0 15px rgba(97,27,255,0.4)</div></div></div>
+    <div class="chip"><div class="dot" style="background:#06bc98;box-shadow:0 0 8px 2px rgba(40,132,118,0.8)"></div><div class="info"><div class="name">glow-teal-sm</div><div class="val">0 0 7px rgba(40,132,118,0.7)</div></div></div>
+  </div>
+</body>
+</html>

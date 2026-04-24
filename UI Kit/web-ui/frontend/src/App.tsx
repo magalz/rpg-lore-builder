@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  ScrollText,
-  MessageSquare,
-  Shield,
-  Book,
-  Sword,
-  Compass,
+import { 
+  ScrollText, 
+  MessageSquare, 
+  Shield, 
+  Book, 
+  Sword, 
+  Compass, 
   Sparkles,
   Send,
   Loader2,
@@ -55,11 +55,11 @@ const t = {
     ritual_chamber: 'Câmara de Rituais',
     ritual_desc: 'Esta câmara está sendo preparada para a execução estruturada de workflows.',
     workflow_desc: 'Workflows aparecerão aqui na próxima atualização.',
-    auth_required: 'Chave de API Necessária',
-    auth_desc: 'Para consultar os espíritos (Gemini AI), você precisa configurar sua chave de API do Google AI Studio.',
-    auth_step1: 'Obtenha sua chave gratuita no portal do Google AI Studio.',
-    auth_step2: 'Adicione a chave no arquivo backend/.env como GEMINI_API_KEY.',
-    auth_retry: 'Já configurei a chave, tentar novamente',
+    auth_required: 'Autenticação Necessária',
+    auth_desc: 'Para consultar os espíritos (Vertex AI), você precisa estar autenticado no Google Cloud.',
+    auth_step1: 'Abra seu terminal ou PowerShell.',
+    auth_step2: 'Execute o comando abaixo e siga as instruções no navegador:',
+    auth_retry: 'Já me autentiquei, tentar novamente',
     agents: {
       'rlb-agent-help': { name: 'Guia', desc: 'Seu ponto de partida. Sempre que não souber o que fazer, pergunte a mim.' },
       'rlb-agent-builder': { name: 'Construtor', desc: 'Especialista em construir e expandir regras e mecânicas.' },
@@ -86,11 +86,11 @@ const t = {
     ritual_chamber: 'Ritual Chamber',
     ritual_desc: 'This chamber is currently being prepared for structured workflow execution.',
     workflow_desc: 'Workflows will appear here in the next update.',
-    auth_required: 'API Key Required',
-    auth_desc: 'To consult the spirits (Gemini AI), you need to configure your Google AI Studio API key.',
-    auth_step1: 'Get your free key from the Google AI Studio portal.',
-    auth_step2: 'Add the key to the backend/.env file as GEMINI_API_KEY.',
-    auth_retry: 'I have configured the key, try again',
+    auth_required: 'Authentication Required',
+    auth_desc: 'To consult the spirits (Vertex AI), you must be authenticated with Google Cloud.',
+    auth_step1: 'Open your terminal or PowerShell.',
+    auth_step2: 'Run the command below and follow the instructions in your browser:',
+    auth_retry: 'I have authenticated, try again',
     agents: {
       'rlb-agent-help': { name: 'Guide', desc: 'Your starting point. Whenever you are unsure what to do, ask me.' },
       'rlb-agent-builder': { name: 'Builder', desc: 'Expert in building and expanding rules and mechanics.' },
@@ -111,99 +111,17 @@ const getAgentInfo = (id: string, lang: Lang) => {
   return dict[id] || dict['default'];
 };
 
-// Model Configuration Data
-const MODELS = [
-  {
-    id: 'gemini-1.5-flash',
-    name: 'Gemini 1.5 Flash',
-    desc: 'Equilíbrio ideal entre velocidade e inteligência.',
-    free: '15 RPM | 1500 RPD',
-    pro: '2000 RPM | 4M TPM',
-    pay: '$0.075 / 1M tokens'
-  },
-  {
-    id: 'gemini-2.5-flash',
-    name: 'Gemini 2.5 Flash',
-    desc: 'Performance de ponta e alta eficiência.',
-    free: '10 RPM | 250 RPD',
-    pro: '1000 RPM | 2M TPM',
-    pay: '$0.10 / 1M tokens'
-  },
-  {
-    id: 'gemini-2.5-flash-lite',
-    name: 'Gemini 2.5 Flash-Lite',
-    desc: 'Ultra-rápido, ideal para respostas curtas.',
-    free: '15 RPM | 1000 RPD',
-    pro: '2000 RPM | 4M TPM',
-    pay: '$0.05 / 1M tokens'
-  },
-  {
-    id: 'gemini-3.1-pro-preview',
-    name: 'Gemini 3.1 Pro (Preview)',
-    desc: 'O mais inteligente. Raciocínio profundo e código.',
-    free: 'Indisponível',
-    pro: '1000 RPM | 2M TPM',
-    pay: '$1.25 / 1M tokens'
-  },
-  {
-    id: 'gemini-3-flash-preview',
-    name: 'Gemini 3 Flash (Preview)',
-    desc: 'Nova geração. Velocidade incrível.',
-    free: 'Indisponível',
-    pro: '2000 RPM | 4M TPM',
-    pay: '$0.10 / 1M tokens'
-  }
-];
-
-// Modal Component
-const BillingModal = ({ isOpen, onClose, lang }: { isOpen: boolean, onClose: () => void, lang: Lang }) => {
-  if (!isOpen) return null;
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '2rem'
-    }}>
-      <div style={{
-        background: 'var(--bg-deep)', border: '1px solid var(--gold-primary)', padding: '2rem',
-        borderRadius: '12px', maxWidth: '600px', width: '100%', boxShadow: '0 0 50px rgba(212, 175, 55, 0.2)'
-      }}>
-        <h3 style={{ color: 'var(--gold-primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Shield size={24} />
-          {lang === 'pt' ? 'Como Limitar Cobranças a Zero' : 'How to Limit Billing to Zero'}
-        </h3>
-        <div style={{ textAlign: 'left', fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-light)' }}>
-          <p style={{ marginBottom: '1rem' }}>{lang === 'pt' ? 'Siga estes passos no Google Cloud Console para garantir que você nunca seja cobrado:' : 'Follow these steps in the Google Cloud Console to ensure you are never charged:'}</p>
-          <ol style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem' }}>
-            <li><strong>{lang === 'pt' ? 'Acesse o Painel:' : 'Access the Dashboard:'}</strong> <a href="https://console.cloud.google.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--gold-primary)' }}>console.cloud.google.com/billing</a></li>
-            <li><strong>{lang === 'pt' ? 'Orçamentos e Alertas:' : 'Budgets & Alerts:'}</strong> {lang === 'pt' ? 'No menu lateral, clique em "Orçamentos e alertas".' : 'Look for "Budgets & alerts" in the sidebar.'}</li>
-            <li><strong>{lang === 'pt' ? 'Criar Orçamento:' : 'Create Budget:'}</strong> {lang === 'pt' ? 'Clique em "Criar orçamento", dê um nome a ele (ex: "Gasto Zero").' : 'Click "Create budget", name it (e.g., "Zero Spend").'}</li>
-            <li><strong>{lang === 'pt' ? 'Valor do Orçamento:' : 'Budget Amount:'}</strong> {lang === 'pt' ? 'Em "Valor", selecione "Especificado" e digite ' : 'Under "Amount", select "Specified" and enter '} <strong>0.00</strong>.</li>
-            <li><strong>{lang === 'pt' ? 'Ações de Alerta:' : 'Alert Actions:'}</strong> {lang === 'pt' ? 'Marque a opção "Desativar faturamento" (se disponível) ou apenas assegure-se de que o alerta de 100% esteja definido.' : 'Check "Disable billing" (if available) or ensure the 100% alert is set.'}</li>
-          </ol>
-          <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{lang === 'pt' ? '* Isso forçará a API a parar de responder assim que os limites gratuitos forem atingidos, evitando qualquer débito no cartão.' : '* This forces the API to stop responding once free limits are reached, preventing any credit card charges.'}</p>
-        </div>
-        <button
-          onClick={onClose}
-          className="send-btn"
-          style={{ marginTop: '2rem', width: '100%', justifyContent: 'center' }}
-        >
-          {lang === 'pt' ? 'Entendi, fechar' : 'Got it, close'}
-        </button>
-      </div>
-    </div>
-  );
-};
-
+// Tree Node Component for Wiki
 const TreeNode = ({ node, level, onLoadFile }: { node: WikiNode, level: number, onLoadFile: (path: string) => void }) => {
   const [expanded, setExpanded] = useState(false);
   const isDir = node.type === 'directory';
-
+  
   return (
     <div>
-      <div
+      <div 
         className="nav-item"
-        style={{
-          padding: `0.4rem 0.4rem 0.4rem ${level * 1.2 + 0.5}rem`,
+        style={{ 
+          padding: `0.4rem 0.4rem 0.4rem ${level * 1.2 + 0.5}rem`, 
           fontSize: '0.9rem',
           opacity: 0.9
         }}
@@ -240,10 +158,6 @@ const App: React.FC = () => {
   const [wikiNodes, setWikiNodes] = useState<WikiNode[]>([]);
   const [selectedWikiContent, setSelectedWikiContent] = useState<string | null>(null);
   const [authError, setAuthError] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState('');
-  const [selectedModelId, setSelectedModelId] = useState(MODELS[0].id);
-  const [isConfiguring, setIsConfiguring] = useState(false);
-  const [showBillingTutorial, setShowBillingTutorial] = useState(false);
   const [backendReady, setBackendReady] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -277,41 +191,8 @@ const App: React.FC = () => {
       const res = await fetch(`${API_BASE}/auth/status`);
       const data = await res.json();
       setAuthError(!data.authenticated);
-      return data.authenticated;
     } catch (e) {
       console.error('Failed to check auth status', e);
-      return false;
-    }
-  };
-
-  const handleConfigureAuth = async () => {
-    if (!apiKeyInput.trim()) return;
-
-    setIsConfiguring(true);
-    try {
-      const res = await fetch(`${API_BASE}/auth/configure`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          api_key: apiKeyInput,
-          model_id: selectedModelId
-        })
-      });
-
-      if (res.ok) {
-        const authenticated = await checkAuth();
-        if (authenticated) {
-          setApiKeyInput('');
-          fetchAgents();
-          fetchWiki();
-        }
-      } else {
-        alert(lang === 'pt' ? 'Erro ao configurar chave.' : 'Error configuring key.');
-      }
-    } catch (e) {
-      console.error('Failed to configure auth', e);
-    } finally {
-      setIsConfiguring(false);
     }
   };
 
@@ -412,11 +293,11 @@ const App: React.FC = () => {
             <Sparkles className="text-gold" />
             <span>{text.app_title}</span>
           </div>
-          <button
-            onClick={toggleLanguage}
-            style={{
-              background: 'transparent', border: '1px solid var(--border-magic)',
-              color: 'var(--text-muted)', padding: '0.2rem 0.5rem',
+          <button 
+            onClick={toggleLanguage} 
+            style={{ 
+              background: 'transparent', border: '1px solid var(--border-magic)', 
+              color: 'var(--text-muted)', padding: '0.2rem 0.5rem', 
               borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem',
               display: 'flex', alignItems: 'center', gap: '4px'
             }}
@@ -427,21 +308,21 @@ const App: React.FC = () => {
           </button>
         </div>
         <nav className="nav-links">
-          <li
+          <li 
             className={`nav-item ${view === 'chat' ? 'active' : ''}`}
             onClick={() => setView('chat')}
           >
             <MessageSquare size={20} />
             {text.nav_chat}
           </li>
-          <li
+          <li 
             className={`nav-item ${view === 'wiki' ? 'active' : ''}`}
             onClick={() => setView('wiki')}
           >
             <Book size={20} />
             {text.nav_codex}
           </li>
-          <li
+          <li 
             className={`nav-item ${view === 'rituals' ? 'active' : ''}`}
             onClick={() => setView('rituals')}
           >
@@ -456,7 +337,7 @@ const App: React.FC = () => {
             {agents.map(agent => {
               const info = getAgentInfo(agent.id, lang);
               return (
-                <div
+                <div 
                   key={agent.id}
                   className={`nav-item ${selectedAgent?.id === agent.id ? 'active' : ''}`}
                   onClick={() => setSelectedAgent(agent)}
@@ -476,8 +357,8 @@ const App: React.FC = () => {
         {view === 'chat' && (
           <div className="chat-container">
             {authError ? (
-              <div style={{
-                flex: 1, display: 'flex', flexDirection: 'column',
+              <div style={{ 
+                flex: 1, display: 'flex', flexDirection: 'column', 
                 alignItems: 'center', justifyContent: 'center', textAlign: 'center',
                 padding: '2rem', gap: '1.5rem'
               }}>
@@ -486,138 +367,49 @@ const App: React.FC = () => {
                 </div>
                 <h2>{text.auth_required}</h2>
                 <p style={{ maxWidth: '500px', color: 'var(--text-muted)' }}>{text.auth_desc}</p>
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '12px',
-                  border: '1px solid var(--border-magic)', width: '100%', maxWidth: '500px',
-                  textAlign: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                <div style={{ 
+                  background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '8px', 
+                  border: '1px solid var(--border-magic)', width: '100%', maxWidth: '600px',
+                  textAlign: 'left'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--gold-primary)' }}>
-                    <Sparkles size={20} />
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                      {lang === 'pt' ? 'Desbloquear o Santuário' : 'Unlock the Sanctum'}
-                    </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--gold-primary)' }}>
+                    <Terminal size={18} />
+                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{lang === 'pt' ? 'Instruções de Acesso' : 'Access Instructions'}</span>
                   </div>
-
-                  <p style={{ fontSize: '0.9rem', marginBottom: '1.5rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-                    {text.auth_desc}
-                    <br />
-                    <a
-                      href="https://aistudio.google.com/app/apikey"
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={(e) => {
-                        // Ensure it opens in system browser if running in specialized environment
-                        if (window.top !== window.self) {
-                          e.preventDefault();
-                          window.open("https://aistudio.google.com/app/apikey", "_blank");
-                        }
-                      }}
-                      style={{ color: 'var(--gold-primary)', textDecoration: 'underline', fontSize: '0.8rem' }}
-                    >
-                      {lang === 'pt' ? 'Obter chave no Google AI Studio (Navegador Externo)' : 'Get key from Google AI Studio (External Browser)'}
+                  <p style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
+                    {lang === 'pt' 
+                      ? '1. Instale o Google Cloud CLI se ainda não o tiver:' 
+                      : '1. Install Google Cloud CLI if you don\'t have it:'}
+                    <a href="https://cloud.google.com/sdk/docs/install" target="_blank" rel="noreferrer" style={{ color: 'var(--gold-primary)', marginLeft: '5px' }}>
+                      cloud.google.com/sdk
                     </a>
                   </p>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{ textAlign: 'left' }}>
-                      <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>
-                        {lang === 'pt' ? 'MODELO MÍSTICO' : 'MYSTIC MODEL'}
-                      </label>
-                      <select
-                        value={selectedModelId}
-                        onChange={(e) => setSelectedModelId(e.target.value)}
-                        style={{
-                          width: '100%', padding: '0.8rem', background: 'rgba(0,0,0,0.5)',
-                          border: '1px solid var(--border-magic)', borderRadius: '4px',
-                          color: 'var(--gold-primary)', fontSize: '0.9rem', cursor: 'pointer'
-                        }}
-                      >
-                        {MODELS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                      </select>
-                      {selectedModelId && (
-                        <div style={{ marginTop: '0.8rem', padding: '0.8rem', background: 'rgba(0,0,0,0.2)', borderLeft: '2px solid var(--gold-primary)', fontSize: '0.7rem' }}>
-                          <p style={{ fontWeight: 'bold', color: 'var(--gold-primary)', marginBottom: '8px' }}>{MODELS.find(m => m.id === selectedModelId)?.desc}</p>
-
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.4rem' }}>
-                            <div style={{ padding: '6px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', textAlign: 'center' }}>
-                              <p style={{ color: 'var(--text-muted)', fontSize: '0.6rem', marginBottom: '2px' }}>FREE LIMITS</p>
-                              <p style={{ fontWeight: 'bold' }}>{MODELS.find(m => m.id === selectedModelId)?.free || '-'}</p>
-                            </div>
-                            <div style={{ padding: '6px', border: '1px solid rgba(212, 175, 55, 0.4)', borderRadius: '4px', background: 'rgba(212, 175, 55, 0.1)', textAlign: 'center' }}>
-                              <p style={{ color: 'var(--gold-primary)', fontSize: '0.6rem', marginBottom: '2px' }}>PRO LIMITS*</p>
-                              <p style={{ fontWeight: 'bold' }}>{MODELS.find(m => m.id === selectedModelId)?.pro || '-'}</p>
-                            </div>
-                            <div style={{ padding: '6px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', textAlign: 'center' }}>
-                              <p style={{ color: 'var(--text-muted)', fontSize: '0.6rem', marginBottom: '2px' }}>PAY-AS-YOU-GO</p>
-                              <p style={{ fontWeight: 'bold' }}>{MODELS.find(m => m.id === selectedModelId)?.pay || '-'}</p>
-                            </div>
-                          </div>
-
-                          <p style={{ fontSize: '0.6rem', opacity: 0.6, marginTop: '10px', fontStyle: 'italic', lineHeight: '1.4' }}>
-                            * RPM: {lang === 'pt' ? 'Requisições por Minuto' : 'Requests per Minute'} | RPD: {lang === 'pt' ? 'Requisições por Dia' : 'Requests per Day'} | TPM: {lang === 'pt' ? 'Tokens por Minuto' : 'Tokens per Minute'}.
-                            <br />
-                            {lang === 'pt' ? 'Planos pagos para usuários Google Cloud Pro/Enterprise.' : 'Paid tiers for Google Cloud Pro/Enterprise users.'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    <input
-                      type="password"
-                      placeholder="GEMINI_API_KEY"
-                      value={apiKeyInput}
-                      onChange={(e) => setApiKeyInput(e.target.value)}
-                      style={{
-                        width: '100%', padding: '0.8rem', background: 'rgba(0,0,0,0.5)',
-                        border: '1px solid var(--border-magic)', borderRadius: '4px',
-                        color: 'var(--gold-primary)', textAlign: 'center', fontSize: '0.9rem'
-                      }}
-                    />
-                    <button
-                      className="send-btn"
-                      style={{
-                        width: '100%', justifyContent: 'center', padding: '0.8rem',
-                        opacity: isConfiguring || !apiKeyInput.trim() ? 0.5 : 1
-                      }}
-                      onClick={handleConfigureAuth}
-                      disabled={isConfiguring || !apiKeyInput.trim()}
-                    >
-                      {isConfiguring ? <Loader2 className="animate-spin" size={18} /> : lang === 'pt' ? 'Conectar Santuário' : 'Connect Sanctum'}
-                    </button>
-
-                    <div style={{
-                      marginTop: '1.5rem', padding: '1rem', background: 'rgba(212, 175, 55, 0.1)',
-                      border: '2px solid var(--gold-primary)', borderRadius: '8px',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                      boxShadow: '0 4px 15px rgba(212, 175, 55, 0.2)'
-                    }}>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--gold-primary)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Shield size={16} />
-                        {lang === 'pt' ? 'PROTEÇÃO DE CRÉDITOS OBRIGATÓRIA' : 'MANDATORY CREDIT PROTECTION'}
-                      </p>
-                      <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                        {lang === 'pt' ? 'Clique abaixo para garantir que seu gasto nunca passe de zero.' : 'Click below to guarantee your spend never exceeds zero.'}
-                      </p>
-                      <button
-                        onClick={() => setShowBillingTutorial(true)}
-                        className="send-btn"
-                        style={{
-                          width: '100%', fontSize: '0.8rem', padding: '0.6rem',
-                          background: 'var(--gold-primary)', color: 'var(--bg-deep)',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        {lang === 'pt' ? 'Configurar Limite Zero' : 'Setup Zero Limit'}
-                      </button>
-                    </div>
-                  </div>
+                  <p style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
+                    {lang === 'pt' 
+                      ? '2. No seu terminal (PowerShell/CMD), execute:' 
+                      : '2. In your terminal (PowerShell/CMD), run:'}
+                  </p>
+                  <code style={{ 
+                    display: 'block', background: '#000', padding: '1rem', 
+                    borderRadius: '4px', border: '1px solid #333', color: '#0f0',
+                    fontFamily: 'monospace', marginBottom: '1rem'
+                  }}>
+                    gcloud auth application-default login
+                  </code>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    {lang === 'pt' 
+                      ? '* Isso abrirá o navegador para você escolher sua conta Google.' 
+                      : '* This will open your browser to choose your Google account.'}
+                  </p>
                 </div>
-
-                <BillingModal
-                  isOpen={showBillingTutorial}
-                  onClose={() => setShowBillingTutorial(false)}
-                  lang={lang}
-                />
+                <button 
+                  className="send-btn" 
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                  onClick={checkAuth}
+                >
+                  <RefreshCw size={18} />
+                  {text.auth_retry}
+                </button>
               </div>
             ) : (
               <>
@@ -627,7 +419,7 @@ const App: React.FC = () => {
                     {selectedAgent ? getAgentInfo(selectedAgent.id, lang).desc : ''}
                   </p>
                 </header>
-
+                
                 <div className="messages">
                   {messages.length === 0 && (
                     <div style={{ textAlign: 'center', marginTop: '4rem', color: 'var(--text-muted)' }}>
@@ -650,8 +442,8 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="input-area">
-                  <input
-                    type="text"
+                  <input 
+                    type="text" 
                     placeholder={`${text.ask_placeholder}${selectedAgent ? getAgentInfo(selectedAgent.id, lang).name : ''}...`}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
