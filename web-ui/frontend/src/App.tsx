@@ -1,20 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  ScrollText,
-  MessageSquare,
   Shield,
-  Book,
-  Sword,
-  Compass,
-  Sparkles,
-  Send,
   Loader2,
-  Globe,
   Lock,
-  Terminal,
-  RefreshCw
+  Sparkles
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import Sidebar from './components/Sidebar';
+import ChatView from './components/ChatView';
+import CodexView from './components/CodexView';
+import RitualsView from './components/RitualsView';
+import RunicLoader from './components/RunicLoader';
 
 // Types
 interface Agent {
@@ -111,120 +106,135 @@ const getAgentInfo = (id: string, lang: Lang) => {
   return dict[id] || dict['default'];
 };
 
-// Model Configuration Data
+// Model Configuration Data — IDs and pricing from https://ai.google.dev/gemini-api/docs/pricing
 const MODELS = [
+  // ── Gemini 3 (Preview) ──────────────────────────────────────────
   {
-    id: 'gemini-1.5-flash',
-    name: 'Gemini 1.5 Flash',
-    desc: 'Equilíbrio ideal entre velocidade e inteligência.',
-    free: '15 RPM | 1500 RPD',
-    pro: '2000 RPM | 4M TPM',
-    pay: '$0.075 / 1M tokens'
+    id: 'gemini-3.1-pro-preview',
+    name: 'Gemini 3.1 Pro Preview',
+    badge: 'NOVO',
+    desc: {
+      pt: 'O modelo mais poderoso do mundo. Melhor em código, agentes e compreensão multimodal.',
+      en: "World's most powerful model. Best for code, agents and multimodal understanding."
+    },
+    free: { rpm: '—', rpd: '—' },
+    pro: { rpm: 'Pago', tpm: 'Tier Pago' },
+    pay: '$2.00/M in (≤200K) · $12.00/M out'
+  },
+  {
+    id: 'gemini-3-flash-preview',
+    name: 'Gemini 3 Flash Preview',
+    badge: 'NOVO',
+    desc: {
+      pt: 'Inteligência de ponta com velocidade Flash. Pesquisa e embasamento superiores.',
+      en: 'Cutting-edge intelligence at Flash speed. Superior search and grounding.'
+    },
+    free: { rpm: '—', rpd: '—' },
+    pro: { rpm: 'Pago', tpm: 'Tier Pago' },
+    pay: '$0.50/M in · $3.00/M out'
+  },
+  {
+    id: 'gemini-3.1-flash-lite-preview',
+    name: 'Gemini 3.1 Flash-Lite Preview',
+    badge: 'NOVO',
+    desc: {
+      pt: 'O mais econômico do Gemini 3. Otimizado para tarefas agentivas de alto volume.',
+      en: 'Most economical Gemini 3. Optimized for high-volume agentic tasks.'
+    },
+    free: { rpm: '—', rpd: '—' },
+    pro: { rpm: 'Pago', tpm: 'Tier Pago' },
+    pay: '$0.25/M in · $1.50/M out'
+  },
+  // ── Gemini 2.5 (Estável) ─────────────────────────────────────────
+  {
+    id: 'gemini-2.5-pro',
+    name: 'Gemini 2.5 Pro',
+    desc: {
+      pt: 'O mais avançado estável. Raciocínio profundo, código e contexto longo (1M tokens).',
+      en: 'Most advanced stable. Deep reasoning, code, and long context (1M tokens).'
+    },
+    free: { rpm: '5 RPM', rpd: '25 RPD' },
+    pro: { rpm: '1000 RPM', tpm: '4M TPM' },
+    pay: '$1.25/M in (≤200K) · $10.00/M out'
   },
   {
     id: 'gemini-2.5-flash',
     name: 'Gemini 2.5 Flash',
-    desc: 'Performance de ponta e alta eficiência.',
-    free: '10 RPM | 250 RPD',
-    pro: '1000 RPM | 2M TPM',
-    pay: '$0.10 / 1M tokens'
+    desc: {
+      pt: 'Melhor custo-benefício. Raciocínio rápido e multimodal (texto, imagem, vídeo, áudio).',
+      en: 'Best cost-performance. Fast reasoning, multimodal (text, image, video, audio).'
+    },
+    free: { rpm: '10 RPM', rpd: '500 RPD' },
+    pro: { rpm: '2000 RPM', tpm: '4M TPM' },
+    pay: '$0.30/M in · $2.50/M out'
   },
   {
     id: 'gemini-2.5-flash-lite',
     name: 'Gemini 2.5 Flash-Lite',
-    desc: 'Ultra-rápido, ideal para respostas curtas.',
-    free: '15 RPM | 1000 RPD',
-    pro: '2000 RPM | 4M TPM',
-    pay: '$0.05 / 1M tokens'
+    desc: {
+      pt: 'O mais rápido e econômico da família 2.5. Ideal para alto volume e baixa latência.',
+      en: 'Fastest and most economical in 2.5 family. Ideal for high volume and low latency.'
+    },
+    free: { rpm: '30 RPM', rpd: '1500 RPD' },
+    pro: { rpm: '4000 RPM', tpm: '8M TPM' },
+    pay: '$0.10/M in · $0.40/M out'
   },
+  // ── Gemini 2.0 (Legacy) ──────────────────────────────────────────
   {
-    id: 'gemini-3.1-pro-preview',
-    name: 'Gemini 3.1 Pro (Preview)',
-    desc: 'O mais inteligente. Raciocínio profundo e código.',
-    free: 'Indisponível',
-    pro: '1000 RPM | 2M TPM',
-    pay: '$1.25 / 1M tokens'
-  },
-  {
-    id: 'gemini-3-flash-preview',
-    name: 'Gemini 3 Flash (Preview)',
-    desc: 'Nova geração. Velocidade incrível.',
-    free: 'Indisponível',
-    pro: '2000 RPM | 4M TPM',
-    pay: '$0.10 / 1M tokens'
+    id: 'gemini-2.0-flash',
+    name: 'Gemini 2.0 Flash',
+    badge: 'LEGACY',
+    desc: {
+      pt: 'Geração anterior — versões específicas descontinuadas. Use 2.5 Flash quando possível.',
+      en: 'Previous generation — some versions deprecated. Prefer 2.5 Flash when possible.'
+    },
+    free: { rpm: '15 RPM', rpd: '1500 RPD' },
+    pro: { rpm: '2000 RPM', tpm: '4M TPM' },
+    pay: '$0.10/M in · $0.40/M out'
   }
 ];
+
 
 // Modal Component
 const BillingModal = ({ isOpen, onClose, lang }: { isOpen: boolean, onClose: () => void, lang: Lang }) => {
   if (!isOpen) return null;
   return (
     <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)',
+      position: 'fixed', inset: 0, background: 'rgba(6,4,15,0.92)', backdropFilter: 'blur(10px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '2rem'
     }}>
-      <div style={{
-        background: 'var(--bg-deep)', border: '1px solid var(--gold-primary)', padding: '2rem',
-        borderRadius: '12px', maxWidth: '600px', width: '100%', boxShadow: '0 0 50px rgba(212, 175, 55, 0.2)'
+      <div className="hud-panel shimmer-panel" style={{
+        padding: '2rem', borderRadius: '12px', maxWidth: '600px', width: '100%',
+        boxShadow: '0 0 50px rgba(78, 207, 198, 0.1)', border: '1px solid var(--teal)'
       }}>
-        <h3 style={{ color: 'var(--gold-primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Shield size={24} />
-          {lang === 'pt' ? 'Como Limitar Cobranças a Zero' : 'How to Limit Billing to Zero'}
-        </h3>
-        <div style={{ textAlign: 'left', fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-light)' }}>
-          <p style={{ marginBottom: '1rem' }}>{lang === 'pt' ? 'Siga estes passos no Google Cloud Console para garantir que você nunca seja cobrado:' : 'Follow these steps in the Google Cloud Console to ensure you are never charged:'}</p>
-          <ol style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem' }}>
-            <li><strong>{lang === 'pt' ? 'Acesse o Painel:' : 'Access the Dashboard:'}</strong> <a href="https://console.cloud.google.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--gold-primary)' }}>console.cloud.google.com/billing</a></li>
-            <li><strong>{lang === 'pt' ? 'Orçamentos e Alertas:' : 'Budgets & Alerts:'}</strong> {lang === 'pt' ? 'No menu lateral, clique em "Orçamentos e alertas".' : 'Look for "Budgets & alerts" in the sidebar.'}</li>
-            <li><strong>{lang === 'pt' ? 'Criar Orçamento:' : 'Create Budget:'}</strong> {lang === 'pt' ? 'Clique em "Criar orçamento", dê um nome a ele (ex: "Gasto Zero").' : 'Click "Create budget", name it (e.g., "Zero Spend").'}</li>
-            <li><strong>{lang === 'pt' ? 'Valor do Orçamento:' : 'Budget Amount:'}</strong> {lang === 'pt' ? 'Em "Valor", selecione "Especificado" e digite ' : 'Under "Amount", select "Specified" and enter '} <strong>0.00</strong>.</li>
-            <li><strong>{lang === 'pt' ? 'Ações de Alerta:' : 'Alert Actions:'}</strong> {lang === 'pt' ? 'Marque a opção "Desativar faturamento" (se disponível) ou apenas assegure-se de que o alerta de 100% esteja definido.' : 'Check "Disable billing" (if available) or ensure the 100% alert is set.'}</li>
-          </ol>
-          <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{lang === 'pt' ? '* Isso forçará a API a parar de responder assim que os limites gratuitos forem atingidos, evitando qualquer débito no cartão.' : '* This forces the API to stop responding once free limits are reached, preventing any credit card charges.'}</p>
+        <div className="hi">
+          <h3 style={{ color: 'var(--teal)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            <Shield size={24} />
+            {lang === 'pt' ? 'Como Limitar Cobranças a Zero' : 'How to Limit Billing to Zero'}
+          </h3>
+          <div style={{ textAlign: 'left', fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-sec)' }}>
+            <p style={{ marginBottom: '1rem' }}>{lang === 'pt' ? 'Siga estes passos no Google Cloud Console para garantir que você nunca seja cobrado:' : 'Follow these steps in the Google Cloud Console to ensure you are never charged:'}</p>
+            <ol style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem' }}>
+              <li><strong>{lang === 'pt' ? 'Acesse o Painel:' : 'Access the Dashboard:'}</strong> <a href="https://console.cloud.google.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--teal)' }}>console.cloud.google.com/billing</a></li>
+              <li><strong>{lang === 'pt' ? 'Orçamentos e Alertas:' : 'Budgets & Alerts:'}</strong> {lang === 'pt' ? 'No menu lateral, clique em "Orçamentos e alertas".' : 'Look for "Budgets & alerts" in the sidebar.'}</li>
+              <li><strong>{lang === 'pt' ? 'Criar Orçamento:' : 'Create Budget:'}</strong> {lang === 'pt' ? 'Clique em "Criar orçamento", dê um nome a ele (ex: "Gasto Zero").' : 'Click "Create budget", name it (e.g., "Zero Spend").'}</li>
+              <li><strong>{lang === 'pt' ? 'Valor do Orçamento:' : 'Budget Amount:'}</strong> {lang === 'pt' ? 'Em "Valor", selecione "Especificado" e digite ' : 'Under "Amount", select "Specified" and enter '} <strong>0.00</strong>.</li>
+              <li><strong>{lang === 'pt' ? 'Ações de Alerta:' : 'Alert Actions:'}</strong> {lang === 'pt' ? 'Marque a opção "Desativar faturamento" (se disponível) ou apenas assegure-se de que o alerta de 100% esteja definido.' : 'Check "Disable billing" (if available) or ensure the 100% alert is set.'}</li>
+            </ol>
+            <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{lang === 'pt' ? '* Isso forçará a API a parar de responder assim que os limites gratuitos forem atingidos, evitando qualquer débito no cartão.' : '* This forces the API to stop responding once free limits are reached, preventing any credit card charges.'}</p>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              marginTop: '2rem', width: '100%', background: 'rgba(78,207,198,0.1)',
+              border: '1px solid var(--teal)', color: 'var(--teal)', padding: '0.8rem',
+              borderRadius: '6px', cursor: 'pointer', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em'
+            }}
+          >
+            {lang === 'pt' ? 'Entendi, fechar' : 'Got it, close'}
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="send-btn"
-          style={{ marginTop: '2rem', width: '100%', justifyContent: 'center' }}
-        >
-          {lang === 'pt' ? 'Entendi, fechar' : 'Got it, close'}
-        </button>
       </div>
-    </div>
-  );
-};
-
-const TreeNode = ({ node, level, onLoadFile }: { node: WikiNode, level: number, onLoadFile: (path: string) => void }) => {
-  const [expanded, setExpanded] = useState(false);
-  const isDir = node.type === 'directory';
-
-  return (
-    <div>
-      <div
-        className="nav-item"
-        style={{
-          padding: `0.4rem 0.4rem 0.4rem ${level * 1.2 + 0.5}rem`,
-          fontSize: '0.9rem',
-          opacity: 0.9
-        }}
-        onClick={() => {
-          if (isDir) setExpanded(!expanded);
-          else onLoadFile(node.path);
-        }}
-      >
-        <span style={{ display: 'inline-block', width: '16px', fontSize: '0.7rem', color: 'var(--gold-primary)' }}>
-          {isDir ? (expanded ? '▼' : '▶') : '•'}
-        </span>
-        {isDir ? <Compass size={16} /> : <ScrollText size={16} />}
-        <span style={{ marginLeft: '6px' }}>{node.name}</span>
-      </div>
-      {isDir && expanded && node.children && (
-        <div className="tree-children">
-          {node.children.map(child => (
-            <TreeNode key={child.path} node={child} level={level + 1} onLoadFile={onLoadFile} />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
@@ -245,7 +255,6 @@ const App: React.FC = () => {
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [showBillingTutorial, setShowBillingTutorial] = useState(false);
   const [backendReady, setBackendReady] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const text = t[lang];
 
@@ -314,10 +323,6 @@ const App: React.FC = () => {
       setIsConfiguring(false);
     }
   };
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   const fetchAgents = async () => {
     try {
@@ -400,214 +405,185 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       {!backendReady && (
-        <div style={{ position: 'fixed', inset: 0, background: 'var(--bg-deep)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <Loader2 className="animate-spin" size={48} color="var(--gold-primary)" />
-          <h2 style={{ marginTop: '2rem' }}>{lang === 'pt' ? 'Despertando o Conselho...' : 'Awakening the Council...'}</h2>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--void)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
+          <img src="/assets/logo.png" alt="RPG Lore Builder" style={{ height: 140, objectFit: 'contain', mixBlendMode: 'screen', filter: 'drop-shadow(0 0 42px rgba(78,207,198,0.7))', animation: 'gemPulse 2s ease-in-out infinite' }} />
+          <RunicLoader size={58} />
+          <span style={{ fontWeight: 600, fontSize: 13, color: 'rgba(196,174,255,0.6)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            {lang === 'pt' ? 'Despertando o Conselho…' : 'Awakening the Council…'}
+          </span>
         </div>
       )}
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="logo" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Sparkles className="text-gold" />
-            <span>{text.app_title}</span>
-          </div>
-          <button
-            onClick={toggleLanguage}
-            style={{
-              background: 'transparent', border: '1px solid var(--border-magic)',
-              color: 'var(--text-muted)', padding: '0.2rem 0.5rem',
-              borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem',
-              display: 'flex', alignItems: 'center', gap: '4px'
-            }}
-            title="Toggle Language"
-          >
-            <Globe size={14} />
-            {lang.toUpperCase()}
-          </button>
-        </div>
-        <nav className="nav-links">
-          <li
-            className={`nav-item ${view === 'chat' ? 'active' : ''}`}
-            onClick={() => setView('chat')}
-          >
-            <MessageSquare size={20} />
-            {text.nav_chat}
-          </li>
-          <li
-            className={`nav-item ${view === 'wiki' ? 'active' : ''}`}
-            onClick={() => setView('wiki')}
-          >
-            <Book size={20} />
-            {text.nav_codex}
-          </li>
-          <li
-            className={`nav-item ${view === 'rituals' ? 'active' : ''}`}
-            onClick={() => setView('rituals')}
-          >
-            <Sword size={20} />
-            {text.nav_rituals}
-          </li>
-        </nav>
 
-        <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-magic)' }}>
-          <h4 style={{ fontSize: '0.7rem', marginBottom: '1rem', color: 'var(--text-muted)' }}>{text.council_members}</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {agents.map(agent => {
-              const info = getAgentInfo(agent.id, lang);
-              return (
-                <div
-                  key={agent.id}
-                  className={`nav-item ${selectedAgent?.id === agent.id ? 'active' : ''}`}
-                  onClick={() => setSelectedAgent(agent)}
-                  style={{ padding: '0.5rem' }}
-                >
-                  <Shield size={16} />
-                  <span style={{ fontSize: '0.85rem' }}>{info.name}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </aside>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+        <Sidebar
+          view={view}
+          setView={setView}
+          agents={agents}
+          selectedAgent={selectedAgent}
+          setSelectedAgent={setSelectedAgent}
+          lang={lang}
+          onLangToggle={toggleLanguage}
+          getAgentInfo={getAgentInfo}
+        />
 
-      {/* Main Content */}
-      <main className="main-content">
-        {view === 'chat' && (
-          <div className="chat-container">
+        <main className="main-content">
+          <div className="scanline" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 5 }} />
+          <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0, position: 'relative', zIndex: 1 }}>
             {authError ? (
               <div style={{
                 flex: 1, display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-                padding: '2rem', gap: '1.5rem'
+                padding: '2rem', gap: '1.5rem', background: 'radial-gradient(ellipse at 50% 30%, rgba(45,26,110,0.3) 0%, transparent 60%)'
               }}>
-                <div style={{ padding: '1.5rem', borderRadius: '50%', background: 'rgba(139, 0, 0, 0.1)', border: '1px solid var(--accent-red)' }}>
-                  <Lock size={48} color="var(--accent-red)" />
+                <div style={{ padding: '1.5rem', borderRadius: '50%', background: 'rgba(200, 50, 50, 0.05)', border: '1px solid rgba(200,50,50,0.3)' }}>
+                  <Lock size={48} color="rgba(255,100,100,0.7)" />
                 </div>
-                <h2>{text.auth_required}</h2>
-                <p style={{ maxWidth: '500px', color: 'var(--text-muted)' }}>{text.auth_desc}</p>
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '12px',
-                  border: '1px solid var(--border-magic)', width: '100%', maxWidth: '500px',
-                  textAlign: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#c4aeff', letterSpacing: '0.05em' }}>{text.auth_required}</h2>
+
+                <div className="hud-panel shimmer-panel" style={{
+                  padding: '2rem', width: '100%', maxWidth: '500px',
+                  textAlign: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--gold-primary)' }}>
-                    <Sparkles size={20} />
-                    <span style={{ fontSize: '1rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                      {lang === 'pt' ? 'Desbloquear o Santuário' : 'Unlock the Sanctum'}
-                    </span>
-                  </div>
-
-                  <p style={{ fontSize: '0.9rem', marginBottom: '1.5rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-                    {text.auth_desc}
-                    <br />
-                    <a
-                      href="https://aistudio.google.com/app/apikey"
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={(e) => {
-                        // Ensure it opens in system browser if running in specialized environment
-                        if (window.top !== window.self) {
-                          e.preventDefault();
-                          window.open("https://aistudio.google.com/app/apikey", "_blank");
-                        }
-                      }}
-                      style={{ color: 'var(--gold-primary)', textDecoration: 'underline', fontSize: '0.8rem' }}
-                    >
-                      {lang === 'pt' ? 'Obter chave no Google AI Studio (Navegador Externo)' : 'Get key from Google AI Studio (External Browser)'}
-                    </a>
-                  </p>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{ textAlign: 'left' }}>
-                      <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>
-                        {lang === 'pt' ? 'MODELO MÍSTICO' : 'MYSTIC MODEL'}
-                      </label>
-                      <select
-                        value={selectedModelId}
-                        onChange={(e) => setSelectedModelId(e.target.value)}
-                        style={{
-                          width: '100%', padding: '0.8rem', background: 'rgba(0,0,0,0.5)',
-                          border: '1px solid var(--border-magic)', borderRadius: '4px',
-                          color: 'var(--gold-primary)', fontSize: '0.9rem', cursor: 'pointer'
-                        }}
-                      >
-                        {MODELS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                      </select>
-                      {selectedModelId && (
-                        <div style={{ marginTop: '0.8rem', padding: '0.8rem', background: 'rgba(0,0,0,0.2)', borderLeft: '2px solid var(--gold-primary)', fontSize: '0.7rem' }}>
-                          <p style={{ fontWeight: 'bold', color: 'var(--gold-primary)', marginBottom: '8px' }}>{MODELS.find(m => m.id === selectedModelId)?.desc}</p>
-
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.4rem' }}>
-                            <div style={{ padding: '6px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', textAlign: 'center' }}>
-                              <p style={{ color: 'var(--text-muted)', fontSize: '0.6rem', marginBottom: '2px' }}>FREE LIMITS</p>
-                              <p style={{ fontWeight: 'bold' }}>{MODELS.find(m => m.id === selectedModelId)?.free || '-'}</p>
-                            </div>
-                            <div style={{ padding: '6px', border: '1px solid rgba(212, 175, 55, 0.4)', borderRadius: '4px', background: 'rgba(212, 175, 55, 0.1)', textAlign: 'center' }}>
-                              <p style={{ color: 'var(--gold-primary)', fontSize: '0.6rem', marginBottom: '2px' }}>PRO LIMITS*</p>
-                              <p style={{ fontWeight: 'bold' }}>{MODELS.find(m => m.id === selectedModelId)?.pro || '-'}</p>
-                            </div>
-                            <div style={{ padding: '6px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', textAlign: 'center' }}>
-                              <p style={{ color: 'var(--text-muted)', fontSize: '0.6rem', marginBottom: '2px' }}>PAY-AS-YOU-GO</p>
-                              <p style={{ fontWeight: 'bold' }}>{MODELS.find(m => m.id === selectedModelId)?.pay || '-'}</p>
-                            </div>
-                          </div>
-
-                          <p style={{ fontSize: '0.6rem', opacity: 0.6, marginTop: '10px', fontStyle: 'italic', lineHeight: '1.4' }}>
-                            * RPM: {lang === 'pt' ? 'Requisições por Minuto' : 'Requests per Minute'} | RPD: {lang === 'pt' ? 'Requisições por Dia' : 'Requests per Day'} | TPM: {lang === 'pt' ? 'Tokens por Minuto' : 'Tokens per Minute'}.
-                            <br />
-                            {lang === 'pt' ? 'Planos pagos para usuários Google Cloud Pro/Enterprise.' : 'Paid tiers for Google Cloud Pro/Enterprise users.'}
-                          </p>
-                        </div>
-                      )}
+                  <div className="hi">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--teal)' }}>
+                      <Sparkles size={20} />
+                      <span style={{ fontSize: '1rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        {lang === 'pt' ? 'Desbloquear o Santuário' : 'Unlock the Sanctum'}
+                      </span>
                     </div>
 
-                    <input
-                      type="password"
-                      placeholder="GEMINI_API_KEY"
-                      value={apiKeyInput}
-                      onChange={(e) => setApiKeyInput(e.target.value)}
-                      style={{
-                        width: '100%', padding: '0.8rem', background: 'rgba(0,0,0,0.5)',
-                        border: '1px solid var(--border-magic)', borderRadius: '4px',
-                        color: 'var(--gold-primary)', textAlign: 'center', fontSize: '0.9rem'
-                      }}
-                    />
-                    <button
-                      className="send-btn"
-                      style={{
-                        width: '100%', justifyContent: 'center', padding: '0.8rem',
-                        opacity: isConfiguring || !apiKeyInput.trim() ? 0.5 : 1
-                      }}
-                      onClick={handleConfigureAuth}
-                      disabled={isConfiguring || !apiKeyInput.trim()}
-                    >
-                      {isConfiguring ? <Loader2 className="animate-spin" size={18} /> : lang === 'pt' ? 'Conectar Santuário' : 'Connect Sanctum'}
-                    </button>
-
-                    <div style={{
-                      marginTop: '1.5rem', padding: '1rem', background: 'rgba(212, 175, 55, 0.1)',
-                      border: '2px solid var(--gold-primary)', borderRadius: '8px',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                      boxShadow: '0 4px 15px rgba(212, 175, 55, 0.2)'
-                    }}>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--gold-primary)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Shield size={16} />
-                        {lang === 'pt' ? 'PROTEÇÃO DE CRÉDITOS OBRIGATÓRIA' : 'MANDATORY CREDIT PROTECTION'}
-                      </p>
-                      <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                        {lang === 'pt' ? 'Clique abaixo para garantir que seu gasto nunca passe de zero.' : 'Click below to guarantee your spend never exceeds zero.'}
-                      </p>
-                      <button
-                        onClick={() => setShowBillingTutorial(true)}
-                        className="send-btn"
-                        style={{
-                          width: '100%', fontSize: '0.8rem', padding: '0.6rem',
-                          background: 'var(--gold-primary)', color: 'var(--bg-deep)',
-                          fontWeight: 'bold'
-                        }}
+                    <p style={{ fontSize: '0.9rem', marginBottom: '0.75rem', color: 'var(--text-sec)', lineHeight: '1.5' }}>
+                      {text.auth_desc}
+                      <br />
+                      <a
+                        href="https://aistudio.google.com/app/apikey"
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: 'var(--teal)', textDecoration: 'underline', fontSize: '0.8rem', display: 'block', marginTop: '8px' }}
                       >
-                        {lang === 'pt' ? 'Configurar Limite Zero' : 'Setup Zero Limit'}
+                        {lang === 'pt' ? 'Obter chave no Google AI Studio' : 'Get key from Google AI Studio'}
+                      </a>
+                    </p>
+
+                    {/* Billing protection — acima do formulário */}
+                    <div style={{
+                      marginBottom: '1rem', padding: '0.85rem 1rem',
+                      background: 'rgba(78,207,198,0.05)',
+                      border: '1px solid rgba(78,207,198,0.2)', borderRadius: '8px',
+                      display: 'flex', flexDirection: 'column', gap: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--teal)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                          <Shield size={14} />
+                          {lang === 'pt' ? 'PROTEÇÃO DE CRÉDITOS' : 'CREDIT PROTECTION'}
+                        </p>
+                        <button
+                          onClick={() => setShowBillingTutorial(true)}
+                          style={{
+                            whiteSpace: 'nowrap', fontSize: '0.75rem', padding: '0.4rem 0.85rem',
+                            background: 'var(--teal)', color: 'var(--bg-deep)',
+                            fontWeight: 700, border: 'none', borderRadius: '4px', cursor: 'pointer', flexShrink: 0,
+                            boxShadow: '0 0 10px rgba(78,207,198,0.4)'
+                          }}
+                        >
+                          {lang === 'pt' ? 'Configurar Agora' : 'Configure Now'}
+                        </button>
+                      </div>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4', margin: 0 }}>
+                        {lang === 'pt'
+                          ? 'O Sanctum protege seus créditos. Clique em "Configurar Agora" para ver o tutorial de como colocar limite de pagamento $0 na sua conta e evitar cobranças na Google Cloud.'
+                          : 'The Sanctum protects your credits. Click "Configure Now" to read how to set a $0 payment limit on your account to avoid Google Cloud charges.'}
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ textAlign: 'left' }}>
+                        <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '4px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                          {lang === 'pt' ? 'MODELO MÍSTICO' : 'MYSTIC MODEL'}
+                        </label>
+                        <select
+                          value={selectedModelId}
+                          onChange={(e) => setSelectedModelId(e.target.value)}
+                          style={{
+                            width: '100%', padding: '0.8rem', background: 'rgba(6,4,15,0.6)',
+                            border: '1px solid var(--border)', borderRadius: '4px',
+                            color: 'var(--teal)', fontSize: '0.9rem', cursor: 'pointer', outline: 'none'
+                          }}
+                        >
+                          {MODELS.map(m => <option key={m.id} value={m.id} style={{ background: '#0a0b1c' }}>{m.name}</option>)}
+                        </select>
+
+                        {/* Reactive model info card */}
+                        {(() => {
+                          const m = MODELS.find(x => x.id === selectedModelId);
+                          if (!m) return null;
+                          const desc = lang === 'pt' ? m.desc.pt : m.desc.en;
+                          const isPreview = m.badge === 'NOVO';
+                          const isLegacy = m.badge === 'LEGACY';
+                          const accentColor = isPreview ? 'rgba(196,174,255' : isLegacy ? 'rgba(255,180,80' : 'rgba(78,207,198';
+                          return (
+                            <div style={{ marginTop: 8, borderRadius: 4, border: `1px solid ${accentColor},0.25)`, overflow: 'hidden', fontSize: 11 }}>
+                              <div style={{ padding: '6px 10px', background: `${accentColor},0.05)`, color: 'var(--text-muted)', fontStyle: 'italic', borderBottom: `1px solid ${accentColor},0.1)`, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                                {m.badge && (
+                                  <span style={{ flexShrink: 0, fontSize: 8, fontWeight: 700, letterSpacing: '0.1em', background: `${accentColor},0.15)`, color: isPreview ? '#c4aeff' : isLegacy ? 'rgba(255,180,80,0.9)' : 'var(--teal)', border: `1px solid ${accentColor},0.3)`, padding: '1px 5px', borderRadius: 9999 }}>
+                                    {isPreview ? '✦ NOVO' : '⚑ LEGACY'}
+                                  </span>
+                                )}
+                                {desc}
+                              </div>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
+                                <div style={{ padding: '7px 8px', borderRight: `1px solid ${isPreview ? 'rgba(196,174,255,0.1)' : 'rgba(78,207,198,0.1)'}` }}>
+                                  <div style={{ color: `${accentColor},0.55)`, fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>FREE</div>
+                                  <div style={{ color: 'var(--text-sec)' }}>{m.free.rpm}</div>
+                                  <div style={{ color: 'var(--text-muted)' }}>{m.free.rpd}</div>
+                                </div>
+                                <div style={{ padding: '7px 8px', borderRight: `1px solid ${accentColor},0.1)` }}>
+                                  <div style={{ color: 'rgba(196,174,255,0.65)', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>PRO</div>
+                                  <div style={{ color: 'var(--text-sec)' }}>{m.pro.rpm}</div>
+                                  <div style={{ color: 'var(--text-muted)' }}>{m.pro.tpm}</div>
+                                </div>
+                                <div style={{ padding: '7px 8px' }}>
+                                  <div style={{ color: 'rgba(255,200,80,0.6)', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>PAY</div>
+                                  <div style={{ color: 'var(--text-muted)', fontSize: 10, lineHeight: 1.4 }}>{m.pay}</div>
+                                </div>
+                              </div>
+                              {(isPreview || isLegacy) && (
+                                <div style={{ padding: '5px 10px', background: `${accentColor},0.04)`, borderTop: `1px solid ${accentColor},0.08)`, color: `${accentColor},0.45)`, fontSize: 9, letterSpacing: '0.05em' }}>
+                                  {isPreview
+                                    ? `⚠ ${lang === 'pt' ? 'Preview: limites de taxa mais restritivos. Pode mudar antes de ser estável.' : 'Preview: stricter rate limits. May change before stable release.'}`
+                                    : `⚑ ${lang === 'pt' ? 'Legacy: versões específicas descontinuadas. Prefira o 2.5 Flash.' : 'Legacy: specific versions shut down. Prefer 2.5 Flash.'}`
+                                  }
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+
+                      <input
+                        type="password"
+                        placeholder="GEMINI_API_KEY"
+                        value={apiKeyInput}
+                        onChange={(e) => setApiKeyInput(e.target.value)}
+                        style={{
+                          width: '100%', padding: '0.8rem', background: 'rgba(6,4,15,0.6)',
+                          border: '1px solid var(--border)', borderRadius: '4px',
+                          color: 'var(--teal)', textAlign: 'center', fontSize: '0.9rem', outline: 'none'
+                        }}
+                      />
+                      <button
+                        style={{
+                          width: '100%', padding: '0.8rem', background: 'rgba(78,207,198,0.1)',
+                          border: '1px solid var(--teal)', color: 'var(--teal)', borderRadius: '4px',
+                          cursor: 'pointer', fontWeight: 600, textTransform: 'uppercase', transition: 'all 0.2s',
+                          opacity: isConfiguring || !apiKeyInput.trim() ? 0.5 : 1
+                        }}
+                        onClick={handleConfigureAuth}
+                        disabled={isConfiguring || !apiKeyInput.trim()}
+                        onMouseEnter={e => { if (!isConfiguring) e.currentTarget.style.background = 'rgba(78,207,198,0.2)'; }}
+                        onMouseLeave={e => { if (!isConfiguring) e.currentTarget.style.background = 'rgba(78,207,198,0.1)'; }}
+                      >
+                        {isConfiguring ? <Loader2 className="animate-spin" size={18} /> : lang === 'pt' ? 'Conectar Santuário' : 'Connect Sanctum'}
                       </button>
                     </div>
                   </div>
@@ -621,86 +597,34 @@ const App: React.FC = () => {
               </div>
             ) : (
               <>
-                <header style={{ marginBottom: '2rem' }}>
-                  <h2>{text.consulting} {selectedAgent ? getAgentInfo(selectedAgent.id, lang).name : ''}</h2>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    {selectedAgent ? getAgentInfo(selectedAgent.id, lang).desc : ''}
-                  </p>
-                </header>
-
-                <div className="messages">
-                  {messages.length === 0 && (
-                    <div style={{ textAlign: 'center', marginTop: '4rem', color: 'var(--text-muted)' }}>
-                      <ScrollText size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                      <p>{text.speak_mestre}</p>
-                    </div>
-                  )}
-                  {messages.map((m, i) => (
-                    <div key={i} className={`message ${m.role}`}>
-                      <ReactMarkdown>{m.content}</ReactMarkdown>
-                    </div>
-                  ))}
-                  {isTyping && (
-                    <div className="message ai" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Loader2 className="animate-spin" size={16} />
-                      <span>{text.spirits_whispering}</span>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                <div className="input-area">
-                  <input
-                    type="text"
-                    placeholder={`${text.ask_placeholder}${selectedAgent ? getAgentInfo(selectedAgent.id, lang).name : ''}...`}
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                {view === 'chat' && (
+                  <ChatView
+                    selectedAgent={selectedAgent}
+                    messages={messages}
+                    inputValue={inputValue}
+                    setInputValue={setInputValue}
+                    handleSendMessage={handleSendMessage}
+                    isTyping={isTyping}
+                    lang={lang}
+                    getAgentInfo={getAgentInfo}
                   />
-                  <button className="send-btn" onClick={handleSendMessage}>
-                    <Send size={18} />
-                  </button>
-                </div>
+                )}
+                {view === 'wiki' && (
+                  <CodexView
+                    wikiNodes={wikiNodes}
+                    selectedWikiContent={selectedWikiContent}
+                    loadWikiFile={loadWikiFile}
+                    lang={lang}
+                  />
+                )}
+                {view === 'rituals' && (
+                  <RitualsView lang={lang} />
+                )}
               </>
             )}
           </div>
-        )}
-
-        {view === 'wiki' && (
-          <div className="wiki-container">
-            <div className="wiki-tree">
-              <h3>{text.codex_index}</h3>
-              <div style={{ marginTop: '1rem' }}>
-                {wikiNodes.map(node => (
-                  <TreeNode key={node.path} node={node} level={0} onLoadFile={loadWikiFile} />
-                ))}
-              </div>
-            </div>
-            <div className="wiki-content">
-              {selectedWikiContent ? (
-                <div className="markdown-body">
-                  <ReactMarkdown>{selectedWikiContent}</ReactMarkdown>
-                </div>
-              ) : (
-                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                  <p>{text.select_scroll}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {view === 'rituals' && (
-          <div style={{ padding: '4rem', textAlign: 'center' }}>
-            <h2>{text.ritual_chamber}</h2>
-            <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>{text.ritual_desc}</p>
-            <div style={{ marginTop: '2rem', padding: '2rem', border: '1px dashed var(--border-magic)', borderRadius: '8px' }}>
-              <Sparkles size={32} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-              <p>{text.workflow_desc}</p>
-            </div>
-          </div>
-        )}
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

@@ -1,194 +1,324 @@
-:root {
-  --bg-deep: #0a0a0a;
-  --bg-panel: #141414;
-  --gold-primary: #d4af37;
-  --gold-hover: #f1c40f;
-  --text-parchment: #e0d8c0;
-  --text-muted: #8a8a8a;
-  --border-magic: rgba(212, 175, 55, 0.2);
-  --accent-red: #8b0000;
-  --font-serif: 'Garamond', 'Georgia', serif;
-  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+/* ═══════════════════════════════════════════════════════════════════
+   RPG LORE BUILDER — LORE SANCTUM Design System
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── FONTS ─────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/static/SpaceGrotesk-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
 }
 
-* {
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/static/SpaceGrotesk-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/static/SpaceGrotesk-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/static/SpaceGrotesk-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/static/SpaceGrotesk-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ─── BASE COLOR TOKENS ─────────────────────────────────────────── */
+:root {
+  /* Colors from UI Kit */
+  --void: #06040f;
+  --bg: #0d0a2e;
+  --panel: rgba(13, 10, 46, 0.82);
+  --surface: rgba(18, 14, 52, 0.9);
+  --purple-deep: #1a0d3d;
+  --purple-mid: #7b68e8;
+  --purple-lt: #c4aeff;
+  --teal: #4ecfc6;
+  --teal-bright: #00e8d8;
+  --text-main: #eae9ff;
+  --text-sec: rgba(205, 202, 233, 0.68);
+  --text-muted: rgba(205, 202, 233, 0.38);
+  --border: rgba(78, 207, 198, 0.22);
+  --border-hi: rgba(78, 207, 198, 0.6);
+
+  /* Semantic aliases */
+  --bg-deep: var(--bg);
+  --gold-primary: var(--teal);
+  /* Mapping old names to new palette for compatibility if needed */
+  --border-magic: var(--border);
+
+  /* Fonts */
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ─── GLOBAL RESET ──────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 body {
-  background-color: var(--bg-deep);
-  color: var(--text-parchment);
+  background: var(--bg);
+  color: var(--text-main);
   font-family: var(--font-sans);
   overflow: hidden;
   height: 100vh;
 }
 
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--font-serif);
-  color: var(--gold-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
+/* ─── SCROLLBARS ────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(78, 207, 198, 0.18);
+  border-radius: 2px;
+}
+
+/* ─── KEYFRAMES ─────────────────────────────────────────────────── */
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbitR {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes gemPulse {
+
+  0%,
+  100% {
+    opacity: .4;
+    transform: scale(.85)
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1)
+  }
+}
+
+@keyframes dotPulse {
+
+  0%,
+  80%,
+  100% {
+    opacity: .3;
+    transform: scale(.8)
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1)
+  }
+}
+
+@keyframes runeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px)
+  }
+
+  to {
+    opacity: 1;
+    transform: none
+  }
+}
+
+@keyframes neonGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(78, 207, 198, 0.15), inset 0 0 4px rgba(78, 207, 198, 0.05);
+  }
+
+  50% {
+    box-shadow: 0 0 14px rgba(78, 207, 198, 0.45), inset 0 0 8px rgba(78, 207, 198, 0.1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes navNeon {
+
+  0%,
+  100% {
+    border-left-color: rgba(78, 207, 198, 0.5);
+    text-shadow: none;
+  }
+
+  50% {
+    border-left-color: #4ecfc6;
+    text-shadow: 0 0 8px rgba(78, 207, 198, 0.6);
+  }
+}
+
+@keyframes inputBreathe {
+
+  0%,
+  100% {
+    border-color: rgba(78, 207, 198, 0.22);
+  }
+
+  50% {
+    border-color: rgba(78, 207, 198, 0.55);
+  }
+}
+
+/* HUD panel corners */
+.hud-panel {
+  position: relative;
+  background: var(--panel);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+
+.hud-panel::before,
+.hud-panel::after,
+.hud-panel>.hi::before,
+.hud-panel>.hi::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--teal);
+  border-style: solid;
+  z-index: 10;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.hud-panel::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.hud-panel::after {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+}
+
+.hud-panel>.hi::before {
+  bottom: -1px;
+  left: -1px;
+  border-width: 0 0 2px 2px;
+}
+
+.hud-panel>.hi::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.shimmer-panel {
+  background-image: linear-gradient(105deg, transparent 40%, rgba(196, 174, 255, 0.06) 50%, transparent 60%);
+  background-size: 200% 100%;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+.scanline::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.12) 2px, rgba(0, 0, 0, 0.12) 3px);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hud-label {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal);
+  opacity: .65;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.hud-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── APP STRUCTURE ─────────────────────────────────────────────── */
 .app-container {
   display: flex;
   height: 100vh;
   width: 100vw;
-}
-
-.sidebar {
-  width: 260px;
-  background-color: var(--bg-panel);
-  border-right: 1px solid var(--border-magic);
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem;
-}
-
-.logo {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.nav-links {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.nav-item {
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--text-muted);
-}
-
-.nav-item:hover,
-.nav-item.active {
-  background-color: rgba(212, 175, 55, 0.1);
-  color: var(--gold-primary);
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(45, 26, 110, 0.45) 0%, transparent 55%), var(--bg);
   position: relative;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
-/* Chat Layout */
-.chat-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
-  max-width: 900px;
-  margin: 0 auto;
-  width: 100%;
+/* Animations for React Transition Group or simple CSS entry */
+.fade-enter {
+  opacity: 0;
 }
 
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding-bottom: 2rem;
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 200ms;
 }
 
-.message {
-  padding: 1rem;
-  border-radius: 8px;
-  max-width: 85%;
-  line-height: 1.6;
+.fade-exit {
+  opacity: 1;
 }
 
-.message.user {
-  align-self: flex-end;
-  background-color: rgba(212, 175, 55, 0.05);
-  border-right: 2px solid var(--gold-primary);
-}
-
-.message.ai {
-  align-self: flex-start;
-  background-color: rgba(255, 255, 255, 0.02);
-  border-left: 2px solid var(--text-muted);
-}
-
-.input-area {
-  margin-top: auto;
-  padding: 1.5rem;
-  background-color: var(--bg-panel);
-  border: 1px solid var(--border-magic);
-  border-radius: 8px;
-  display: flex;
-  gap: 1rem;
-}
-
-input[type="text"] {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: var(--text-parchment);
-  font-size: 1rem;
-  outline: none;
-}
-
-button.send-btn {
-  background: transparent;
-  border: 1px solid var(--gold-primary);
-  color: var(--gold-primary);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-button.send-btn:hover {
-  background: var(--gold-primary);
-  color: var(--bg-deep);
-}
-
-/* Wiki Layout */
-.wiki-container {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  height: 100%;
-}
-
-.wiki-tree {
-  border-right: 1px solid var(--border-magic);
-  padding: 1rem;
-  overflow-y: auto;
-}
-
-.wiki-content {
-  padding: 3rem;
-  overflow-y: auto;
-  line-height: 1.8;
-}
-
-.markdown-body h1 {
-  margin-top: 0;
-}
-
-.markdown-body p {
-  margin-bottom: 1rem;
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 200ms;
 }
