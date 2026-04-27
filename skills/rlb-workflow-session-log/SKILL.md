@@ -1,5 +1,5 @@
 ---
-name: rlb-workflow-session-log
+name: Registrar Sessão
 description: Guia o Mestre no registro estruturado de sessões e na Sessão Zero. [Use quando o usuário disser 'registrar sessão', 'relatar o que aconteceu no jogo' ou 'fazer a sessão zero'.]
 ---
 

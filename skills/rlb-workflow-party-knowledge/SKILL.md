@@ -1,5 +1,5 @@
 ---
-name: rlb-workflow-party-knowledge
+name: Conhecimento do Grupo
 description: Compila o conhecimento atual dos personagens ("O que vocês sabem sobre o mundo").
 ---
 

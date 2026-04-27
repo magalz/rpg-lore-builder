@@ -1,5 +1,5 @@
 ---
-name: rlb-workflow-prep-session
+name: Preparar Sessão
 description: Maestro de preparação da próxima sessão. Une drama (Weaver) e tática (Tactician). [Use quando o usuário disser 'preparar próxima sessão', 'gerar roteiro de aventura' ou 'planejar o jogo'.]
 ---
 

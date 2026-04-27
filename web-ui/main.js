@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell } = require('electron');
+const { app, BrowserWindow, shell, ipcMain } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const os = require('os');
@@ -38,12 +38,14 @@ function createWindow() {
     width: 1200,
     height: 800,
     title: 'Lore Sanctum',
+    frame: false,
+    transparent: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
       webSecurity: false // Desativa temporariamente para evitar bloqueios de CORS locais
     },
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#00000000',
     autoHideMenuBar: true,
   });
 
@@ -75,6 +77,14 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  // IPC Handlers for window controls
+  ipcMain.on('window-min', () => mainWindow.minimize());
+  ipcMain.on('window-max', () => {
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
+    else mainWindow.maximize();
+  });
+  ipcMain.on('window-close', () => mainWindow.close());
 }
 
 app.whenReady().then(() => {

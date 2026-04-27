@@ -1,5 +1,5 @@
 ---
-name: rlb-workflow-backstory
+name: Integrar Backstory
 description: Integra a história de novos personagens (backstory) à Lore existente do mundo.
 ---
 

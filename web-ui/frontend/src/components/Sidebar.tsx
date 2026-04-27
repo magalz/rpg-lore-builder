@@ -15,6 +15,7 @@ interface SidebarProps {
     lang: string;
     onLangToggle: () => void;
     getAgentInfo: (id: string, lang: string) => { name: string; desc: string };
+    onOpenSettings: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -24,7 +25,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     selectedAgent,
     setSelectedAgent,
     lang,
-    getAgentInfo
+    getAgentInfo,
+    onOpenSettings
 }) => {
     const [hov, setHov] = useState<string | null>(null);
 
@@ -48,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             height: '100%',
             overflow: 'hidden'
         }}>
-            <div className="hi" style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', zIndex: 2 }}>
+            <div className="hi" style={{ display: 'flex', flexDirection: 'column', height: '100%', zIndex: 2 }}>
                 {/* Logo */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
                     <img
@@ -106,7 +108,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                         return (
                             <div
                                 key={agent.id}
-                                onClick={() => setSelectedAgent(agent)}
+                                onClick={() => {
+                                    setSelectedAgent(agent);
+                                    if (view !== 'chat') setView('chat');
+                                }}
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
@@ -125,6 +130,22 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </div>
                         );
                     })}
+                </div>
+
+                {/* Fixed bottom controls */}
+                <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid rgba(78,207,198,0.1)' }}>
+                    <div
+                        onClick={onOpenSettings}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 4, cursor: 'pointer',
+                            color: 'var(--text-muted)', fontSize: 13, transition: 'all 0.15s'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#c4aeff'; e.currentTarget.style.background = 'rgba(107,79,240,0.1)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; }}
+                    >
+                        <Shield size={13} color="rgba(205,202,233,0.28)" />
+                        {lang === 'pt' ? 'Configurações' : 'Settings'}
+                    </div>
                 </div>
             </div>
         </aside>

@@ -1,5 +1,5 @@
 ---
-name: rlb-workflow-downtime
+name: Gerenciar Downtime
 description: Simula a passagem do tempo no mundo e avança eventos de facções e vilões em background.
 ---
 

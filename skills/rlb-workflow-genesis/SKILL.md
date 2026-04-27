@@ -1,5 +1,5 @@
 ---
-name: rlb-workflow-genesis
+name: Criar Gênese
 description: Cria bases de mundo consistentes e estruturadas. [Use quando o usuário pedir para 'criar um mundo do zero', 'gerar worldbuilding' ou 'iniciar uma campanha'.]
 ---
 
