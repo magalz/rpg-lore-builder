@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Shield,
-  Lock,
 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import ChatView from './components/ChatView';
@@ -347,6 +346,9 @@ const App: React.FC = () => {
   const [showBillingTutorial, setShowBillingTutorial] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [backendReady, setBackendReady] = useState(false);
+  const [activeCampaign, setActiveCampaign] = useState('rlb');
+  const [campaigns, setCampaigns] = useState(['rlb']);
+  const [autoSave, setAutoSave] = useState(true);
 
   // Custom Modal State
   const [modal, setModal] = useState<{
@@ -365,7 +367,6 @@ const App: React.FC = () => {
     setModal({ isOpen: true, title, message, onConfirm: () => setModal(prev => ({ ...prev, isOpen: false })) });
   };
 
-  const text = t[lang];
   const messages = selectedAgent ? (conversations[selectedAgent.id] || []) : [];
 
   useEffect(() => {
@@ -380,7 +381,7 @@ const App: React.FC = () => {
             setBackendReady(true);
             checkAuth();
             fetchAgents();
-            fetchWiki();
+            fetchCampaigns();
             fetchWorkflows();
           }
         } catch (e) {
@@ -399,6 +400,9 @@ const App: React.FC = () => {
       setAuthError(!data.authenticated);
       if (data.model_id) {
         setSelectedModelId(data.model_id);
+      }
+      if (data.auto_save !== undefined) {
+        setAutoSave(data.auto_save);
       }
       return data.authenticated;
     } catch (e) {
@@ -420,18 +424,25 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           api_key: apiKeyInput,
-          model_id: selectedModelId
+          model_id: selectedModelId,
+          auto_save: autoSave
         })
       });
 
       if (res.ok) {
+        // Find if this was just an auto-save toggle or a full reconfig
+        const isReconfig = apiKeyInput.trim() !== "" || selectedModelId !== MODELS[0].id; // Simplified check
+
         showAlert(
-          lang === 'pt' ? 'Recalibrando Energias' : 'Recalibrating Energies',
-          lang === 'pt' ? 'Chave salva. O Santuário será reiniciado para concluir a conexão...' : 'Key saved. The Sanctum will restart to complete the connection...'
+          lang === 'pt' ? 'Configurações Salvas' : 'Settings Saved',
+          lang === 'pt' ? 'As alterações foram aplicadas com sucesso.' : 'Changes applied successfully.'
         );
 
-        // Reload regardless of immediate validity to flush SDK state
-        setTimeout(() => window.location.reload(), 1500);
+        if (isReconfig) {
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          setView('chat');
+        }
       } else {
         const errData = await res.json().catch(() => ({}));
         showAlert(
@@ -481,15 +492,34 @@ const App: React.FC = () => {
     }
   };
 
-  const fetchWiki = async () => {
+  const fetchCampaigns = async () => {
     try {
-      const res = await fetch(`${API_BASE}/wiki`);
+      const res = await fetch(`${API_BASE}/campaigns`);
+      const data: string[] = await res.json();
+      setCampaigns(data);
+      if (data.length > 0 && !data.includes(activeCampaign)) {
+        setActiveCampaign(data[0]);
+      }
+    } catch (e) {
+      console.error('Failed to fetch campaigns', e);
+    }
+  };
+
+  const fetchWiki = async (campaignId: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/wiki?campaign_id=${campaignId}`);
       const data = await res.json();
       setWikiNodes(data);
     } catch (e) {
       console.error('Failed to fetch wiki', e);
     }
   };
+
+  useEffect(() => {
+    if (backendReady) {
+      fetchWiki(activeCampaign);
+    }
+  }, [backendReady, activeCampaign]);
 
   const fetchWorkflows = async () => {
     try {
@@ -510,12 +540,39 @@ const App: React.FC = () => {
 
   const loadWikiFile = async (path: string) => {
     try {
-      const res = await fetch(`${API_BASE}/wiki/content?path=${path}`);
+      const res = await fetch(`${API_BASE}/wiki/content?path=${path}&campaign_id=${activeCampaign}`);
       const data = await res.json();
       setSelectedWikiContent(data.content);
     } catch (e) {
       console.error('Failed to load wiki file', e);
     }
+  };
+
+  const handleCreateCampaign = async () => {
+    const name = window.prompt(lang === 'pt' ? 'Nome da nova campanha:' : 'New campaign name:');
+    if (!name) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/campaigns?name=${encodeURIComponent(name)}`, { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        setCampaigns(prev => [...prev, data.id]);
+        handleSwitchCampaign(data.id);
+      }
+    } catch (e) {
+      console.error('Failed to create campaign', e);
+    }
+  };
+
+  const handleExportCampaign = () => {
+    window.open(`${API_BASE}/campaigns/${activeCampaign}/export`);
+  };
+
+  const handleSwitchCampaign = (id: string) => {
+    setActiveCampaign(id);
+    setConversations({});
+    setSelectedWikiContent(null);
+    if (view !== 'chat') setView('chat');
   };
 
   const handleSendMessage = async (customMessage?: string, hidden: boolean = false, files: any[] = [], clearHistory: boolean = false) => {
@@ -543,6 +600,7 @@ const App: React.FC = () => {
         body: JSON.stringify({
           agent_id: currentAgentId,
           message: activeMsg,
+          campaign_id: activeCampaign,
           history: historyPayload,
           files: files
         })
@@ -565,6 +623,16 @@ const App: React.FC = () => {
           ...prev,
           [currentAgentId]: [...(prev[currentAgentId] || []), { role: 'ai', content: data.response }]
         }));
+
+        // Show toast if tool was used
+        if (data.tool_used) {
+          showAlert(
+            lang === 'pt' ? 'Ação Autônoma' : 'Autonomous Action',
+            lang === 'pt' ? 'O agente realizou uma operação de escrita/memória com sucesso.' : 'The agent successfully performed a write/memory operation.'
+          );
+          // Refresh wiki if needed
+          fetchWiki(activeCampaign);
+        }
       } else {
         throw new Error(data.detail || 'Unknown error');
       }
@@ -606,53 +674,32 @@ const App: React.FC = () => {
       )}
 
       {/* Persistent Fail-safe Auth Overlay */}
-      {authError && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 5000, background: 'rgba(5, 3, 12, 0.98)', backdropFilter: 'blur(15px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <div style={{ textAlign: 'center', maxWidth: '400px' }} className="shimmer-panel">
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', padding: '2rem' }}>
-              <div style={{ padding: '1.5rem', borderRadius: '50%', background: 'rgba(200, 50, 50, 0.05)', border: '1px solid rgba(200,50,50,0.3)' }}>
-                <Lock size={48} color="rgba(255,100,100,0.7)" />
-              </div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#c4aeff', letterSpacing: '0.05em' }}>{text.auth_required}</h2>
-              <p style={{ color: 'var(--text-muted)', lineHeight: '1.5', fontSize: '0.9rem' }}>{text.auth_desc}</p>
-              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <input
-                  type="password"
-                  placeholder="GEMINI_API_KEY"
-                  value={apiKeyInput}
-                  onChange={(e) => setApiKeyInput(e.target.value)}
-                  style={{ width: '100%', padding: '0.8rem', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(78,207,198,0.2)', borderRadius: 4, color: '#4ecfc6', textAlign: 'center' }}
-                />
-                <button
-                  onClick={handleConfigureAuth}
-                  disabled={isConfiguring}
-                  style={{ width: '100%', padding: '0.8rem', background: '#4ecfc6', color: '#000', fontWeight: 700, border: 'none', borderRadius: 4, cursor: 'pointer' }}
-                >
-                  {isConfiguring ? '...' : text.auth_btn}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Removed Generic Auth Overlay */}
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
-        <Sidebar
-          view={view === 'settings' ? 'chat' : view}
-          setView={setView}
-          agents={agents}
-          selectedAgent={selectedAgent}
-          setSelectedAgent={changeAgent}
-          lang={lang}
-          onLangToggle={toggleLanguage}
-          getAgentInfo={(id, l) => getAgentInfo(id, l as Lang, agents, workflows)}
-          onOpenSettings={() => setView('settings')}
-        />
+        {!authError && (
+          <Sidebar
+            view={view === 'settings' ? 'chat' : view}
+            setView={setView}
+            agents={agents}
+            selectedAgent={selectedAgent}
+            setSelectedAgent={changeAgent}
+            lang={lang}
+            onLangToggle={toggleLanguage}
+            getAgentInfo={(id, l) => getAgentInfo(id, l as Lang, agents, workflows)}
+            onOpenSettings={() => setView('settings')}
+            activeCampaign={activeCampaign}
+            campaigns={campaigns}
+            onSwitchCampaign={handleSwitchCampaign}
+            onCreateCampaign={handleCreateCampaign}
+            onExportCampaign={handleExportCampaign}
+          />
+        )}
 
         <main className="main-content">
           <div className="scanline" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 5 }} />
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0, position: 'relative', zIndex: 1 }}>
-            {view === 'chat' && (
+            {!authError && view === 'chat' && (
               <ChatView
                 agent={selectedAgent}
                 messages={messages}
@@ -666,7 +713,7 @@ const App: React.FC = () => {
                 showAlert={showAlert}
               />
             )}
-            {view === 'wiki' && (
+            {view === 'wiki' && !authError && (
               <CodexView
                 wikiNodes={wikiNodes}
                 selectedWikiContent={selectedWikiContent}
@@ -674,7 +721,7 @@ const App: React.FC = () => {
                 lang={lang}
               />
             )}
-            {view === 'rituals' && (
+            {view === 'rituals' && !authError && (
               <RitualsView
                 lang={lang}
                 setView={setView}
@@ -685,7 +732,7 @@ const App: React.FC = () => {
                 handleSendMessage={(msg, hidden) => handleSendMessage(msg, hidden, [], true)}
               />
             )}
-            {view === 'settings' && (
+            {(authError || view === 'settings') && (
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
                 <div style={{ maxWidth: 500, width: '100%' }} className="hud-panel shimmer-panel">
                   <div className="hi" style={{ padding: '2rem', textAlign: 'center' }}>
@@ -746,6 +793,19 @@ const App: React.FC = () => {
                         style={{ width: '100%', padding: '0.7rem', background: 'rgba(0,0,0,0.4)', border: `1px solid ${apiError ? 'rgba(255,100,100,0.4)' : 'var(--border)'}`, borderRadius: 4, color: 'var(--teal)', outline: 'none' }}
                       />
                       {apiError && <p style={{ color: '#ff6b6b', fontSize: 11, marginTop: 4 }}>{apiError}</p>}
+                    </div>
+
+                    <div style={{ textAlign: 'left', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <input
+                        type="checkbox"
+                        id="autoSave"
+                        checked={autoSave}
+                        onChange={(e) => setAutoSave(e.target.checked)}
+                        style={{ width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--teal)' }}
+                      />
+                      <label htmlFor="autoSave" style={{ fontSize: 13, color: 'var(--text-sec)', cursor: 'pointer' }}>
+                        {lang === 'pt' ? 'Habilitar Auto-Save (Function Calling)' : 'Enable Auto-Save (Function Calling)'}
+                      </label>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

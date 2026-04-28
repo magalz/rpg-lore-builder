@@ -4,7 +4,7 @@
 Finalizar o log e passar a responsabilidade para o Historian processar os dados.
 
 ## Instruções
-1. **Consolidação:** Compile todas as informações coletadas em um arquivo Markdown chamado `_bmad/memory/rlb/temp_session_report.md`.
+1. **Consolidação:** Compile todas as informações coletadas em um arquivo Markdown chamado `{CAMPAIGN_ROOT}/raw/temp_session_report.md`.
 2. **Formato do Relatório:**
    - Cabeçalho com Metadados (Data, Título, PCs presentes).
    - Seção de Eventos Gerais.
@@ -13,4 +13,4 @@ Finalizar o log e passar a responsabilidade para o Historian processar os dados.
 4. **Próximo Passo:** Invocar o `rlb-agent-historian` com o arquivo de relatório como input.
 
 ## Saída Esperada
-O arquivo `temp_session_report.md` salvo na memória temporária e a transição para o agente Historian.
+O arquivo `temp_session_report.md` salvo na pasta `raw/` da campanha e a transição para o agente Historian.

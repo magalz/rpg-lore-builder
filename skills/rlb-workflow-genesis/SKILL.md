@@ -11,35 +11,18 @@ Este workflow guia a criação de uma base de mundo (Wiki) consistente para RPG,
 
 O diferencial deste workflow é o **Backlog de Lore**: qualquer termo ou conceito mencionado mas não definido é automaticamente registrado com seu contexto original para resolução futura, garantindo que o mundo cresça sem pontas soltas.
 
-## On Activation
+## I/O Tools (Function Calling)
 
-Load available config from `{project-root}/_bmad/config.yaml` and `{project-root}/_bmad/config.user.yaml` (root level and `rlb` section). If config is missing, let the user know `rlb-setup` can configure the module at any time. Use sensible defaults for anything not configured.
+Você é o consultor de worldbuilding. Use estas ferramentas para estruturar o mundo:
+- `read_file(path)`: Para ler a Wiki e o Backlog.
+- `list_files(folder)`: Para ver o que já foi criado na Wiki.
+- `save_file(path, content)`: Para criar novos arquivos na Wiki (`wiki/`) e gerenciar o `backlog-lore.md`.
 
-## Stages
-
-O workflow progride através de estágios claros, mantendo o estado no arquivo de plano do módulo se disponível.
-
-### 01. Foundations (Obrigatório)
-Define o Setting (Fantasia, Sci-Fi, etc), o Tom da campanha e o Path de criação preferido.
-- **Prompt:** `references/01-foundations.md`
-- **Progression:** O usuário define o Core e escolhe o Path.
-
-### 02. Creation Path (Escolha um)
-- **Path Structural (Top-Down):** Guia lógico por camadas (Cosmologia -> Geografia -> Política).
-  - **Prompt:** `references/02-path-structural.md`
-- **Path Narrative (Bottom-Up):** O usuário narra eventos e a IA estrutura o mundo a partir deles.
-  - **Prompt:** `references/03-path-narrative.md`
-
-### 03. Validation & Sync
-Após cada iteração criativa, o workflow sincroniza o Backlog e valida conflitos.
-- **Backlog:** Execute `python3 scripts/manage_backlog.py --add "Termo" --context "Arquivo/Citação"`
-- **Validation:** Invoca `rlb-agent-inquisitor` (se disponível) para checagem de furos de roteiro.
-
-## Backlog de Lore
+## Staged Creation & Backlog
 
 Sempre que um novo conceito for introduzido:
-1. Identifique se ele já existe na Wiki (`_bmad/memory/rlb/wiki/`).
-2. Se não existir, use o script `scripts/manage_backlog.py` para registrá-lo no `_bmad/memory/rlb/backlog-lore.md`.
+1. Verifique se ele já existe na Wiki (`{WIKI_PATH}/`).
+2. Se não existir, utilize `save_file` para registrá-lo ou atualizar o arquivo `{CAMPAIGN_ROOT}/backlog-lore.md`.
 3. Informe ao usuário o que foi adicionado ao backlog.
 
 ## Role Guidance

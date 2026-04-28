@@ -36,18 +36,18 @@ A arquitetura segue o **Lore Council & Sentinel Pattern**, dividindo as responsa
 
 O módulo utiliza o padrão de **Single Shared Memory** para que todos os agentes tenham a mesma "fonte da verdade".
 
-- **Local:** `_bmad/memory/rlb/`
+- **Local:** `{CAMPAIGN_ROOT}/` (Dinâmico por Campanha)
 - **Estrutura:**
     - `wiki/`: Arquivos Markdown atômicos para Entidades, Locais, Organizações e Lendas.
     - `chronicles/`: Logs históricos e resumos de sessões passadas.
     - `conflicts/`: Registro de "debitos técnicos" de lore e resoluções de inconsistências.
-    - `index.md`: Mapa central da Wiki para orientação rápida dos agentes.
+    - `sanctum/`: Memória persistente e consciência individual de cada agente.
 
 ### Memory Contract
 
-- **`index.md`**: Todos os agentes lêem na ativação. O `historian` e `builder` atualizam ao criar novos tópicos.
-- **`wiki/*.md`**: `builder` e `chronicler` escrevem; `weaver` lê para criar tramas; `inquisitor` lê tudo para validar conflitos.
-- **`conflicts/log.md`**: Escrito pelo `inquisitor` quando detecta problemas; lido pelo usuário e agentes envolvidos na resolution.
+- **`sanctum/`**: Cada agente lê sua própria subpasta na ativação para manter continuidade.
+- **`wiki/*.md`**: Alterado via ferramentas por `builder` e `historian`; lido por todos.
+- **`conflicts/`**: Escrito pelo `inquisitor` ao detectar problemas; lido pelo usuário para resolução.
 
 ### Cross-Agent Patterns
 
@@ -75,7 +75,7 @@ O módulo utiliza o padrão de **Single Shared Memory** para que todos os agente
 
 **Memory:** 
 - **Lê:** `_bmad/memory/rlb/index.md`.
-- **Escreve:** Arquivos em `_bmad/memory/rlb/wiki/`, atualiza o `index.md` e gerencia o `backlog-lore.md`.
+- **Escreve:** Arquivos em `{WIKI_PATH}/`, atualiza o `index.md` e gerencia o `backlog-lore.md`.
 - **Validação:** Chama o `rlb-agent-inquisitor` ao final de cada iteração para checagem de conflitos.
 
 ### rlb-agent-inquisitor (CONCLUÍDO ✅)

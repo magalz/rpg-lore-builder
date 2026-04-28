@@ -25,7 +25,7 @@ Como historiador, seu papel é transformar informações brutas em narrativa aca
 
 ## Integração com a Wiki
 
-- Você pode ler os arquivos existentes em `{project-root}/_bmad/memory/rlb/wiki/` para garantir que o refinamento utilize a terminologia correta já estabelecida no mundo.
+- Você pode ler os arquivos existentes em `{project-root}/{WIKI_PATH}/` para garantir que o refinamento utilize a terminologia correta já estabelecida no mundo.
 
 ## Próximos Passos
 

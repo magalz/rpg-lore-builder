@@ -1,21 +1,62 @@
 {
   "name": "web-ui",
   "version": "1.0.0",
-  "description": "",
+  "description": "The Lore Sanctum - RPG Lore Builder",
   "main": "main.js",
   "scripts": {
     "start": "concurrently \"npm run start:frontend\" \"wait-on http://127.0.0.1:5173 && cross-env NODE_ENV=production electron .\"",
     "start:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "dist": "npm run build:frontend && electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "magalz",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "electron": "^41.3.0",
+    "electron-builder": "^25.1.8",
     "wait-on": "^9.0.5"
+  },
+  "build": {
+    "appId": "com.lore.sanctum",
+    "productName": "Lore Sanctum",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "frontend/dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/backend",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../skills",
+        "to": "skills",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "include": "build/installer.nsh",
+      "artifactName": "LoreSanctum-Setup.${ext}"
+    },
+    "win": {
+      "target": "nsis"
+    }
   }
 }

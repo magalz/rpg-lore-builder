@@ -10,7 +10,7 @@ interface RitualsViewProps {
     handleSendMessage: (customMessage?: string, hidden?: boolean, files?: any[], clearHistory?: boolean) => void | Promise<void>;
 }
 
-const RitualsView: React.FC<RitualsViewProps> = ({ lang, setView, setInputValue, setSelectedAgent, agents, workflows, handleSendMessage }) => {
+const RitualsView: React.FC<RitualsViewProps> = ({ lang, setView, setSelectedAgent, workflows, handleSendMessage }) => {
     const handleClick = (w: any) => {
         setSelectedAgent(w);
         const startPrompt = lang === 'pt'

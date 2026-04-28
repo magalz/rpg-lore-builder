@@ -4,7 +4,7 @@
 Determinar se estamos iniciando uma campanha (Sessão Zero) ou continuando uma jornada existente.
 
 ## Instruções
-1. Verifique se a pasta `_bmad/memory/rlb/chronicles/` contém arquivos.
+1. Verifique se a pasta `{CAMPAIGN_ROOT}/chronicles/` contém arquivos.
    - Se estiver vazia: Assuma **Sessão Zero**.
    - Se houver arquivos: Pergunte ao mestre se é uma nova sessão ou uma correção de uma anterior.
 

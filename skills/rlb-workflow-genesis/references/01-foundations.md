@@ -16,4 +16,4 @@ Guie o usuário através das seguintes definições essenciais. Não peça tudo 
 *Nota: Detalhes como 'Regras de Magia' e 'Escala' podem ser definidos aqui ou deixados para serem descobertos durante o Path escolhido.*
 
 ## Outcome
-Ao final deste estágio, crie o arquivo `{project-root}/_bmad/memory/rlb/wiki/foundations.md` com o resumo dessas definições. Este arquivo servirá como a "âncora de tom" para todas as gerações futuras.
+Ao final deste estágio, crie o arquivo `{project-root}/{WIKI_PATH}/foundations.md` com o resumo dessas definições. Este arquivo servirá como a "âncora de tom" para todas as gerações futuras.

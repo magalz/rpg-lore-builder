@@ -8,16 +8,39 @@ let pythonProcess;
 
 // Função para iniciar o Backend Python
 function startPythonBackend() {
-  const backendPath = path.join(__dirname, 'backend');
   const isWindows = os.platform() === 'win32';
-  const venvPython = isWindows
-    ? path.join(backendPath, '.venv', 'Scripts', 'python.exe')
-    : path.join(backendPath, '.venv', 'bin', 'python');
+  const isPackaged = app.isPackaged;
 
-  console.log('Iniciando servidor de Lore (Python)...');
-  pythonProcess = spawn(venvPython, ['main.py'], {
-    cwd: backendPath,
-    env: { ...process.env }, // Herda o env para carregar o .env e variáveis do sistema
+  // No modo empacotado, usamos o executável do PyInstaller
+  // Em dev, usamos o venv local
+  let executable;
+  let args = [];
+  let cwd;
+
+  if (isPackaged) {
+    // electron-builder coloca extraResources em 'resources'
+    const resourcesPath = process.resourcesPath;
+    executable = isWindows
+      ? path.join(resourcesPath, 'backend', 'backend.exe')
+      : path.join(resourcesPath, 'backend', 'backend');
+    cwd = path.join(resourcesPath, 'backend');
+
+    // Caminho de persistência no AppData
+    const userDataPath = app.getPath('userData');
+    args = ['--data-dir', userDataPath];
+  } else {
+    const backendPath = path.join(__dirname, 'backend');
+    executable = isWindows
+      ? path.join(backendPath, '.venv', 'Scripts', 'python.exe')
+      : path.join(backendPath, '.venv', 'bin', 'python');
+    args = ['main.py'];
+    cwd = backendPath;
+  }
+
+  console.log(`Iniciando servidor de Lore (${isPackaged ? 'Prod' : 'Dev'})...`);
+  pythonProcess = spawn(executable, args, {
+    cwd: cwd,
+    env: { ...process.env },
   });
 
   pythonProcess.stdout.on('data', (data) => {

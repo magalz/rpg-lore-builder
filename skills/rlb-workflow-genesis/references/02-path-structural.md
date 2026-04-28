@@ -18,6 +18,6 @@ Após a confirmação do plano, siga a ordem definida pelo usuário:
 *   **[Categorias Customizadas]:** Itens definidos no passo inicial.
 
 ## Guidelines
-- Para cada elemento criado, gere um arquivo `.md` em `_bmad/memory/rlb/wiki/`.
+- Para cada elemento criado, gere um arquivo `.md` em `{WIKI_PATH}/`.
 - Verifique sempre o `index.md` para manter a lista de tópicos atualizada.
 - Se o usuário mencionar algo que pertence a uma camada ainda não criada (ex: cita um Rei sem ter criado o Reino), registre no Backlog via `scripts/manage_backlog.py`.

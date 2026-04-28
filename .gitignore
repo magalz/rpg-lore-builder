@@ -3,10 +3,21 @@ __pycache__/
 .gemini/
 .claude/
 .idx/
+.agent/
+UI Kit/
+fonts/
+
+# Build and Distribution
+web-ui/backend/build/
+web-ui/backend/dist/
+web-ui/frontend/dist/
+*.exe
+*.zip
 
 # Web UI
 web-ui/node_modules/
 web-ui/frontend/node_modules/
 web-ui/backend/.venv/
 web-ui/backend/.env
-web-ui/frontend/dist/
+web-ui/dist_electron/
+web-ui/resources/backend/

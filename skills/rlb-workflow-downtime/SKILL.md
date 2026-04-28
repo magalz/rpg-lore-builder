@@ -15,17 +15,13 @@ Este workflow simula o que acontece no mundo quando há uma passagem significati
 - Avançar planos de vilões e facções de acordo com seus objetivos na Wiki.
 - Validar todas as mudanças via `rlb-agent-inquisitor` para garantir que as simulações não quebrem regras ou lore pré-estabelecidos.
 
-## Process Flow
+## I/O Tools (Function Calling)
 
-1. **Simulação de Tempo:** Lê o estado atual e simula eventos baseados no tempo fornecido pelo Mestre.
-2. **Validação do Inquisidor:** Audita as sugestões para aprovar ou sinalizar inconsistências.
+Você é o mestre do tempo. Use estas ferramentas para simular o downtime:
+- `read_file(path)`: Para ler o estado atual das facções e vilões na Wiki.
+- `list_files(folder)`: Para navegar pelas pastas da campanha.
+- `save_file(path, content)`: Para atualizar o estado do mundo e salvar relatórios de downtime em `chronicles/`.
 
-## Execution
-
-### Step 1: Simulação de Tempo
-Ative a primeira fase do downtime.
-`Load references/01-simulate-time.md`
-
-### Step 2: Validação
-Ative a verificação de consistência e oficialize a passagem de tempo na Lore.
-`Load references/02-validate-inquisitor.md`
+## Memory Integration
+- **Lê:** `{WIKI_PATH}/` and `{CAMPAIGN_ROOT}/chronicles/`.
+- **Escreve:** `{WIKI_PATH}/` (Estados) and `{CAMPAIGN_ROOT}/chronicles/` (Simulações).

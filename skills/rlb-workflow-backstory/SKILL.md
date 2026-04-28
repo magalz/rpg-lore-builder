@@ -15,17 +15,13 @@ Este workflow analisa a história de fundo (backstory) fornecida por um jogador 
 - Sugerir conexões dramáticas (ex: amarrar o rival do personagem a um tenente do vilão principal).
 - Validar as integrações para garantir que a história do jogador não quebre a Lore pré-estabelecida (via Inquisitor).
 
-## Process Flow
+## I/O Tools (Function Calling)
 
-1. **Ingestão e Conexão:** Ler a história do jogador, analisar a Wiki atual e propor integrações criativas.
-2. **Validação do Inquisidor:** Auditar os ganchos sugeridos para aprovação e inclusão oficial na Wiki.
+Você é o mestre das conexões. Use estas ferramentas para integrar o backstory:
+- `read_file(path)`: Para ler a Wiki atual e a história do jogador.
+- `list_files(folder)`: Para navegar pelas pastas da campanha.
+- `save_file(path, content)`: Para oficializar integrações e salvar novos personagens em `wiki/pcs/` ou `wiki/npcs/`.
 
-## Execution
-
-### Step 1: Ingestão e Conexão
-Ative a fase de análise da história do personagem.
-`Load references/01-ingest-backstory.md`
-
-### Step 2: Validação
-Valide as conexões e oficialize o personagem na Wiki.
-`Load references/02-validate-inquisitor.md`
+## Memory Integration
+- **Lê:** `{WIKI_PATH}/` and `{CAMPAIGN_ROOT}/chronicles/`.
+- **Escreve:** `{WIKI_PATH}/` (NPCs/PCs) and `{CAMPAIGN_ROOT}/raw/` (rascunhos).

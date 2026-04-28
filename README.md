@@ -19,18 +19,20 @@ Qualquer nova informação que entra na campanha passa pela **Ingestão Universa
 
 ## 🚀 Como Preparar o Ambiente
 
+O Lore Sanctum agora é uma aplicação **Standalone nativa**.
+
 ### Pré-requisitos
-- Ter o **Gemini CLI** ou um framework BMad compatível rodando.
-- Chave de API de um modelo de linguagem forte (como Google Gemini ou Claude).
+- Ter o executável **Lore Sanctum** ou rodar o ambiente de desenvolvimento.
+- Chave de API do Google Gemini.
 - (Recomendado) Ter o aplicativo **Obsidian** instalado para visualizar a pasta `wiki/` como um cofre (Vault) visual.
 
-### Instalação
-1. Clone o repositório: 
-   ```bash
-   git clone https://github.com/magalz/rpg-lore-builder.git
-   ```
-2. Acesse a pasta do projeto e inicie sua ferramenta de IA (ex: Gemini CLI).
-3. A estrutura de memória já está preparada nas pastas `_bmad/memory/rlb/raw` e `_bmad/memory/rlb/wiki`. Opcionalmente, abra a pasta `wiki/` dentro do **Obsidian** para aproveitar o Graph View.
+### Instalação (Desenvolvedor)
+1. Clone o repositório.
+2. No backend (`web-ui/backend`): `pip install -r requirements.txt`.
+3. No frontend (`web-ui/frontend`): `npm install`.
+4. Build do Executável: `npm run dist` na pasta `web-ui`.
+
+A estrutura de memória agora é automática e multi-campanha, gerenciada diretamente na pasta `campaigns/`.
 
 ---
 

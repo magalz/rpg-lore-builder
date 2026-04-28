@@ -17,4 +17,4 @@ Transformar os dados brutos compilados em um documento épico e legível para os
    - **Pessoas de Interesse:** NPCs relevantes, separados em "Aliados", "Inimigos" e "Duvidosos".
    - **Fios Desatados:** Rumores escutados e tarefas pendentes que os personagens sabem que existem.
 3. A linguagem deve ser amigável para os jogadores, escrita na segunda pessoa do plural ("Vocês sabem que...", "Vocês descobriram...").
-4. Salve o arquivo (ou entregue o texto para o Mestre salvar) em `_bmad/memory/rlb/handouts/party_knowledge.md`.
+4. Salve o arquivo (ou entregue o texto para o Mestre salvar) em `{CAMPAIGN_ROOT}/handouts/party_knowledge.md`.

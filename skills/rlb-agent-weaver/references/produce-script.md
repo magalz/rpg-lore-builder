@@ -22,7 +22,7 @@ Este é o portão de qualidade narrativa e coesão.
 2.  **Apresentação e Discussão:** Apresente o roteiro ao Mestre, informando o que o Inquisitor aprovou ou os riscos de lore detectados. Discuta mudanças, novas ideias e batidas dramáticas.
 3.  **Adaptação:** Incorpore os feedbacks e ajustes do Mestre ao roteiro.
 4.  **Re-Validação Obrigatória (Crivo Final):** **NÃO** finalize o roteiro sem passar pela segunda auditoria do `rlb-agent-inquisitor`. Qualquer mudança feita pelo Mestre ou por você durante a discussão deve ser re-auditada para garantir que o plano final seja 100% coerente.
-5.  **Produção:** Somente após o "Sinal Verde" final do Inquisitor, salve o arquivo em `_bmad/memory/rlb/scripts_privados/proxima_sessao.md`.
+5.  **Produção:** Somente após o "Sinal Verde" final do Inquisitor, salve o arquivo em `{CAMPAIGN_ROOT}/scripts_privados/proxima_sessao.md`.
 
 ## Regras Não-Negociáveis
 

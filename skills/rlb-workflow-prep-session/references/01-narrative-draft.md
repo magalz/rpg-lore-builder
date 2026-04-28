@@ -2,7 +2,7 @@
 
 ## Instruções
 1. Invoque o **rlb-agent-weaver** com a capacidade `script-session`.
-2. Peça que ele analise a última crônica em `_bmad/memory/rlb/chronicles/`.
+2. Peça que ele analise a última crônica em `{CAMPAIGN_ROOT}/chronicles/`.
 3. O Weaver deve produzir 3-5 Beats Dramáticos.
 4. **Mandato Crítico:** Garanta que ele use a tag `[ENCONTRO: Dificuldade, Tema]` para cada potencial combate.
 

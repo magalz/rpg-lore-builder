@@ -13,7 +13,7 @@ Analisar as tramas e planos em andamento na Wiki e sugerir como o mundo reagiu a
 Peça ao mestre: "Quanto tempo se passou? Onde os personagens estavam e o que faziam de forma geral?"
 
 ## Ação
-1. Leia `_bmad/memory/rlb/wiki` com foco nas Facções, Fronts (vilões) e Locais relevantes.
+1. Leia `{WIKI_PATH}` com foco nas Facções, Fronts (vilões) e Locais relevantes.
 2. Determine o progresso dos planos em andamento. Se um culto pretendia roubar um artefato e os heróis ficaram parados 2 meses, o culto muito provavelmente obteve sucesso.
 3. Gere 3 a 5 eventos (Rumores, Mudanças, Consequências) que aconteceram no cenário durante esse período.
 

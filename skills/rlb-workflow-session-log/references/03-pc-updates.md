@@ -4,7 +4,7 @@
 Garantir que a evolução mecânica e narrativa de cada jogador seja registrada.
 
 ## Instruções
-1. Liste todos os arquivos em `_bmad/memory/rlb/wiki/pcs/` (ignorando o template).
+1. Liste todos os arquivos em `{WIKI_PATH}/pcs/` (ignorando o template).
 2. Para **cada personagem**, faça um check-in direcionado:
 
 ### Questionário Guia:

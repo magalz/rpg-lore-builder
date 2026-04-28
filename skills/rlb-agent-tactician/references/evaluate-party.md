@@ -4,7 +4,7 @@
 Analisar o poder real do grupo de jogadores para servir de base para o balanceamento de encontros.
 
 ## Instruções
-1. Leia todos os arquivos na pasta `_bmad/memory/rlb/wiki/pcs/`.
+1. Leia todos os arquivos na pasta `{WIKI_PATH}/pcs/`.
 2. **Cálculo de Poder:**
    - Calcule o Nível Médio do Grupo (APL - Average Party Level).
    - Identifique itens mágicos ou habilidades que aumentem significativamente o poder (ex: "Armadura +2", "Bola de Fogo").

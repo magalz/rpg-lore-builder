@@ -20,12 +20,13 @@ Este workflow analisa a memória central do módulo (Crônicas e partes pública
 1. **Compilação de Conhecimento:** Vasculhar a Wiki e as Crônicas, filtrando informações marcadas como segredo.
 2. **Formatação e Exportação:** Estruturar a informação compilada em um documento amigável para os jogadores.
 
-## Execution
+## I/O Tools (Function Calling)
 
-### Step 1: Compilação de Conhecimento
-Inicie a varredura da base de dados sob a perspectiva dos personagens.
-`Load references/01-compile-knowledge.md`
+Você é o compilador da party. Use estas ferramentas para gerar o conhecimento dos jogadores:
+- `read_file(path)`: Para ler arquivos da Wiki e Crônicas.
+- `list_files(folder)`: Para navegar pelas pastas da campanha.
+- `save_file(path, content)`: Para salvar o handout final em `handouts/conhecimento_do_grupo.md`.
 
-### Step 2: Formatação de Relatório
-Gere o documento final para distribuição aos jogadores.
-`Load references/02-format-report.md`
+## Memory Integration
+- **Lê:** `{WIKI_PATH}/` and `{CAMPAIGN_ROOT}/chronicles/`.
+- **Escreve:** `{CAMPAIGN_ROOT}/handouts/conhecimento_do_grupo.md`.

@@ -16,6 +16,11 @@ interface SidebarProps {
     onLangToggle: () => void;
     getAgentInfo: (id: string, lang: string) => { name: string; desc: string };
     onOpenSettings: () => void;
+    activeCampaign: string;
+    campaigns: string[];
+    onSwitchCampaign: (id: string) => void;
+    onCreateCampaign: () => void;
+    onExportCampaign: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -26,7 +31,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     setSelectedAgent,
     lang,
     getAgentInfo,
-    onOpenSettings
+    onOpenSettings,
+    activeCampaign,
+    campaigns,
+    onSwitchCampaign,
+    onCreateCampaign,
+    onExportCampaign
 }) => {
     const [hov, setHov] = useState<string | null>(null);
 
@@ -98,6 +108,75 @@ const Sidebar: React.FC<SidebarProps> = ({
                     alt=""
                     style={{ width: '100%', opacity: 0.45, marginBottom: 14 }}
                 />
+
+                <div className="hud-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {lang === 'pt' ? 'Campanha Ativa' : 'Active Campaign'}
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                    <select
+                        value={activeCampaign}
+                        onChange={(e) => onSwitchCampaign(e.target.value)}
+                        className="hud-panel shimmer-panel"
+                        style={{
+                            width: '100%',
+                            background: 'rgba(78,207,198,0.05)',
+                            border: '1px solid rgba(78,207,198,0.25)',
+                            color: 'var(--teal)',
+                            fontSize: 12,
+                            padding: '8px',
+                            borderRadius: 4,
+                            cursor: 'pointer',
+                            outline: 'none',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                        }}
+                    >
+                        {campaigns.map(c => (
+                            <option key={c} value={c} style={{ background: 'var(--void)' }}>{c.toUpperCase()}</option>
+                        ))}
+                    </select>
+
+                    <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                        <button
+                            onClick={onCreateCampaign}
+                            title={lang === 'pt' ? 'Nova Campanha' : 'New Campaign'}
+                            className="hud-panel shimmer-panel"
+                            style={{
+                                flex: 1,
+                                padding: '6px',
+                                fontSize: 10,
+                                background: 'rgba(196,174,255,0.05)',
+                                border: '1px solid rgba(196,174,255,0.3)',
+                                color: '#c4aeff',
+                                cursor: 'pointer',
+                                borderRadius: 4,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.1em'
+                            }}
+                        >
+                            {lang === 'pt' ? '+ Nova' : '+ New'}
+                        </button>
+                        <button
+                            onClick={onExportCampaign}
+                            title={lang === 'pt' ? 'Exportar Wiki (.zip)' : 'Export Wiki (.zip)'}
+                            className="hud-panel shimmer-panel"
+                            style={{
+                                flex: 1,
+                                padding: '6px',
+                                fontSize: 10,
+                                background: 'rgba(78,207,198,0.05)',
+                                border: '1px solid rgba(78,207,198,0.3)',
+                                color: 'var(--teal)',
+                                cursor: 'pointer',
+                                borderRadius: 4,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.1em'
+                            }}
+                        >
+                            {lang === 'pt' ? 'Exportar' : 'Export'}
+                        </button>
+                    </div>
+                </div>
 
                 <div className="hud-label">{lang === 'pt' ? 'Conselho' : 'Council'}</div>
                 <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>

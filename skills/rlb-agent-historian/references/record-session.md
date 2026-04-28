@@ -15,7 +15,7 @@ Esta capacidade permite transformar o caos de uma sessão de jogo em um registro
 
 - O relato é transformado em uma **Crônica Literária** (estilo narrativo de livro), preservando o drama e os momentos épicos.
 - Se receber um `temp_session_report.md` do workflow de log, processa todos os campos estruturados.
-- O arquivo é salvo em `_bmad/memory/rlb/chronicles/sessao_XX.md`.
+- O arquivo é salvo em `{CAMPAIGN_ROOT}/chronicles/sessao_XX.md`.
 - As mudanças mecânicas e narrativas dos PCs são preparadas para o `analyze-impact`.
 
 ## Processamento de Log Estruturado

@@ -7,7 +7,7 @@ O Mestre está se sentando para preparar a próxima sessão. Antes que o Weaver 
 
 ## Instruções de Execução
 
-1. **Varredura (Headless):** Acesse a pasta `_bmad/memory/rlb/wiki/`. 
+1. **Varredura (Headless):** Acesse a pasta `{WIKI_PATH}/`. 
 2. **Busca por Anomalias:**
    - **Pontas Soltas Temporais:** NPCs ou plots que foram deixados "em suspense" há muito tempo no tempo da campanha e nunca mais foram resolvidos.
    - **Contradições:** Informações conflitantes entre duas notas diferentes (Ex: A cidade X é descrita como destruída em uma nota, mas vibrante na nota de comércio).

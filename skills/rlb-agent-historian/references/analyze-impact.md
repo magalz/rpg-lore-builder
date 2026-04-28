@@ -14,7 +14,7 @@ Esta capacidade identifica mudanças no mundo e na evolução dos heróis após 
 ## O Que o Sucesso Parece
 
 - Identificação de mudanças na Wiki de Lore (NPCs, Locais, Facções).
-- Identificação de mudanças nas Fichas de PCs (`_bmad/memory/rlb/wiki/pcs/`).
+- Identificação de mudanças nas Fichas de PCs (`{WIKI_PATH}/pcs/`).
 - Distinção clara entre impactos **Mecânicos** (Level Up, Itens) e **Narrativos** (Traumas, Relações).
 
 ## Gestão de Personagens (PCs)

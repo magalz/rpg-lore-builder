@@ -12,8 +12,8 @@ O Mestre recebe um veredito claro: "Aprovado" (sem conflitos) ou "Alerta de Conf
 ## Sua Abordagem
 1.  **Extração de Entidades:** Identifique Personagens (NPCs e PCs), Locais e Datas no texto proposto.
 2.  **Busca Eficiente:** Use o script `scripts/search_lore.py` para buscar esses termos em:
-    - `_bmad/memory/rlb/wiki/` (Lore Geral)
-    - `_bmad/memory/rlb/wiki/pcs/` (Personagens dos Jogadores)
+    - `{WIKI_PATH}/` (Lore Geral)
+    - `{WIKI_PATH}/pcs/` (Personagens dos Jogadores)
 3.  **Análise de Contradição:** 
     *   Ex: Se o texto diz que o Rei morreu em 1022, mas a Wiki diz que ele assinou um tratado em 1025, isso é um conflito.
     *   Ex: Se um PC é descrito como tendo um item que o Tactician marcou como perdido, isso é um conflito.
